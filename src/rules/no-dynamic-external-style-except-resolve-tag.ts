@@ -18,16 +18,15 @@ export default createRule<Options, MessageIds>({
 
       TaggedTemplateExpression(node) {
         if (!styledJSXModule) return;
-        const tagType = styledJSXModule.resolveTag(node);
+        const tag = styledJSXModule.resolveTag(node);
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        if (!tagType) return;
+        if (!tag) return;
 
         const hasDynamicValues = node.quasi.expressions.length > 0;
-
-        if (tagType !== "css.resolve" && hasDynamicValues) {
+        if (tag.type !== "css.resolve" && hasDynamicValues) {
           context.report({
             data: {
-              tagType,
+              tagType: tag.type,
             },
             messageId: "noDynamicExternalStyleExceptResolveTag",
             node,

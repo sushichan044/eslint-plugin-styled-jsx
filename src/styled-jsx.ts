@@ -46,7 +46,12 @@ interface StyledJSXImportInfo {
 export type StyledJSXTag = "css" | "css.global" | "css.resolve";
 
 export interface StyledJSXModule {
-  resolveTag(node: TSESTree.TaggedTemplateExpression): false | StyledJSXTag;
+  resolveTag(node: TSESTree.TaggedTemplateExpression):
+    | false
+    | {
+        range: TSESTree.Range;
+        type: StyledJSXTag;
+      };
 }
 
 /**
@@ -107,12 +112,18 @@ export function prepareStyledJSXModule(program: Readonly<TSESTree.Program>): Sty
         const tagName = node.tag.name;
 
         if (info.defaultImportName !== null && tagName === info.defaultImportName) {
-          return "css";
+          return {
+            range: node.tag.range,
+            type: "css",
+          };
         }
 
         const importedName = info.localNameToNamedExport[tagName];
         if (importedName != null) {
-          return `css.${importedName}`;
+          return {
+            range: node.tag.range,
+            type: `css.${importedName}`,
+          };
         }
 
         return false;
@@ -143,9 +154,15 @@ export function prepareStyledJSXModule(program: Readonly<TSESTree.Program>): Sty
         if (info.defaultImportName !== null && objectName === info.defaultImportName) {
           switch (tagName) {
             case "global":
-              return "css.global";
+              return {
+                range: node.tag.property.range,
+                type: "css.global",
+              };
             case "resolve":
-              return "css.resolve";
+              return {
+                range: node.tag.property.range,
+                type: "css.resolve",
+              };
             default:
               return false;
           }
@@ -153,11 +170,20 @@ export function prepareStyledJSXModule(program: Readonly<TSESTree.Program>): Sty
         if (info.namespaceImportName !== null && objectName === info.namespaceImportName) {
           switch (tagName) {
             case "default":
-              return "css";
+              return {
+                range: node.tag.property.range,
+                type: "css",
+              };
             case "global":
-              return "css.global";
+              return {
+                range: node.tag.property.range,
+                type: "css.global",
+              };
             case "resolve":
-              return "css.resolve";
+              return {
+                range: node.tag.property.range,
+                type: "css.resolve",
+              };
             default:
               return false;
           }

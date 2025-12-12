@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  attw: { level: "error", profile: "esm-only" },
+  attw: { level: "error", profile: "node16" },
   clean: true,
   dts: {
     resolve: ["type-fest"],

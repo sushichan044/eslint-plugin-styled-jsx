@@ -17,8 +17,9 @@ type Plugin = Except<ESLint.Plugin, "configs"> & {
   };
 };
 
-// @ts-expect-error recommended config will be assigned later
 const plugin: Plugin = {
+  // @ts-expect-error shareable configs will be set later
+  configs: {},
   meta: {
     name,
     version,
@@ -28,25 +29,23 @@ const plugin: Plugin = {
   version,
 };
 
-Object.assign(plugin, {
-  configs: {
-    all: {
-      plugins: {
-        "styled-jsx": plugin,
-      },
-      rules: {
-        [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
-      },
+Object.assign(plugin.configs, {
+  all: {
+    plugins: {
+      "styled-jsx": plugin,
     },
-    recommended: {
-      plugins: {
-        "styled-jsx": plugin,
-      },
-      rules: {
-        [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
-      },
+    rules: {
+      [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
     },
   },
-} satisfies Plugin);
+  recommended: {
+    plugins: {
+      "styled-jsx": plugin,
+    },
+    rules: {
+      [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
+    },
+  },
+} satisfies Plugin["configs"]);
 
 export default plugin;

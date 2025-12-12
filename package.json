@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-styled-jsx",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "ESLint plugin for styled-jsx",
   "sideEffects": false,

@@ -14,6 +14,7 @@ const rules = {
 
 type Plugin = Except<ESLint.Plugin, "configs"> & {
   configs: {
+    all: Linter.Config | Linter.Config[];
     recommended: Linter.Config | Linter.Config[];
   };
 };
@@ -31,6 +32,14 @@ const plugin: Plugin = {
 
 Object.assign(plugin, {
   configs: {
+    all: {
+      plugins: {
+        "styled-jsx": plugin,
+      },
+      rules: {
+        [`styled-jsx/${RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG}`]: "error",
+      },
+    },
     recommended: {
       plugins: {
         "styled-jsx": plugin,

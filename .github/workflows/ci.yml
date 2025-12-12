@@ -46,3 +46,7 @@ jobs:
 
       - name: Run test
         run: pnpm run test
+
+      - name: ESLint Rule Docs Generation Check
+        run: |
+          pnpm run docs:generate --check

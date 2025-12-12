@@ -35,14 +35,19 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    }
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "eslint": "^8.57.0 || ^9.0.0"
+    "eslint": ">=8.57.0"
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 --fix",
@@ -52,9 +57,10 @@
     "typecheck": "tsgo --noEmit",
     "test": "vitest --run",
     "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint:check && pnpm run test && pnpm run build",
-    "build": "tsdown",
+    "build": "tsdown && eslint-doc-generator",
     "prepublishOnly": "pnpm run build",
-    "pkg-pr-new": "pkg-pr-new publish --compact --comment=update --pnpm"
+    "pkg-pr-new": "pkg-pr-new publish --compact --comment=update --pnpm",
+    "docs:generate": "eslint-doc-generator"
   },
   "packageManager": "pnpm@10.23.0",
   "devDependencies": {
@@ -66,6 +72,7 @@
     "@virtual-live-lab/eslint-config": "catalog:dev",
     "@virtual-live-lab/tsconfig": "catalog:dev",
     "eslint": "catalog:dev",
+    "eslint-doc-generator": "2.4.0",
     "eslint-plugin-import-access": "catalog:dev",
     "eslint-vitest-rule-tester": "3.0.0",
     "oxfmt": "catalog:dev",
@@ -74,6 +81,7 @@
     "release-it": "catalog:dev",
     "release-it-pnpm": "catalog:dev",
     "styled-jsx": "5.1.7",
+    "tinyexec": "1.0.2",
     "tsdown": "catalog:dev",
     "type-fest": "5.3.1",
     "typescript": "catalog:dev",

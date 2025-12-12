@@ -9,7 +9,7 @@ export default defineConfig({
   },
   entry: ["src/index.ts"],
   fixedExtension: true,
-  format: "esm",
+  format: ["esm", "cjs"],
   fromVite: true,
   minify: "dce-only",
   nodeProtocol: true,

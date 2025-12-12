@@ -8,19 +8,24 @@ YOU MUST CHECK `pnpm run check` passing before finishing any task.
 
 ### Overview
 
-TBD
+ESLint plugin for styled-jsx that provides rules focused on safe usage of `styled-jsx/css` in React codebases.
 
 ### Architecture
 
-TBD
+TypeScript + ESM only. Rules live in `src/rules`, shared helpers in `src/utils.ts`, styled-jsx tag resolution in `src/styled-jsx.ts`, plugin entry in `src/index.ts`, bundled to `dist` via tsdown.
 
 ### Key Features
 
-TBD
+- Rule: `no-dynamic-external-style-except-resolve-tag` (disallow dynamic values in `styled-jsx/css` tags except `css.resolve`).
+- Recommended config exports the rule enabled as `error`.
+- Tree-shakeable build with `sideEffects: false` and type-safe exports.
 
 ### Design Decisions
 
-TBD
+- Target ESLint ^8.57.0 / ^9.0.0 with typed rule creator.
+- Import-access rules enforced; keep internal helpers private via JSDoc annotations.
+- ESM-only publishing; CommonJS is unsupported by design.
+- Use Vitest for rule tests and tsdown for bundling to keep output minimal.
 
 ---
 

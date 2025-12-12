@@ -4,7 +4,7 @@ import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 
 import { extractModuleImports } from "./utils";
 
-interface StyledJsxImportInfo {
+interface StyledJSXImportInfo {
   /**
    * The local name of the default import, or null if not imported.
    *
@@ -58,7 +58,7 @@ export interface StyledJSXModule {
 export function prepareStyledJSXModule(program: Readonly<TSESTree.Program>): StyledJSXModule {
   const imports = extractModuleImports(program, "styled-jsx/css");
 
-  const info: StyledJsxImportInfo = {
+  const info: StyledJSXImportInfo = {
     defaultImportName: null,
     localNameToNamedExport: {},
     namespaceImportName: null,

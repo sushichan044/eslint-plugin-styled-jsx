@@ -81,7 +81,9 @@ describe("prepareStyledJSXModule", () => {
       const taggedTemplate = findTaggedTemplate(ast);
       assert.isNotNull(taggedTemplate);
 
-      expect(module.resolveTag(taggedTemplate)).toBe(expectedTag);
+      const result = module.resolveTag(taggedTemplate);
+      assert.isNotFalse(result);
+      expect(result.type).toBe(expectedTag);
     });
   });
 
@@ -127,7 +129,9 @@ describe("prepareStyledJSXModule", () => {
       const taggedTemplate = findTaggedTemplate(ast);
       assert.isNotNull(taggedTemplate);
 
-      expect(module.resolveTag(taggedTemplate)).toBe(expectedTag);
+      const result = module.resolveTag(taggedTemplate);
+      assert.isNotFalse(result);
+      expect(result.type).toBe(expectedTag);
     });
   });
 
@@ -165,7 +169,9 @@ describe("prepareStyledJSXModule", () => {
       const taggedTemplate = findTaggedTemplate(ast);
 
       assert.isNotNull(taggedTemplate);
-      expect(module.resolveTag(taggedTemplate)).toBe(expectedTag);
+      const result = module.resolveTag(taggedTemplate);
+      assert.isNotFalse(result);
+      expect(result.type).toBe(expectedTag);
     });
   });
 
@@ -210,7 +216,9 @@ describe("prepareStyledJSXModule", () => {
       const taggedTemplate = findTaggedTemplate(ast);
 
       assert.isNotNull(taggedTemplate);
-      expect(module.resolveTag(taggedTemplate)).toBe(expectedTag);
+      const result = module.resolveTag(taggedTemplate);
+      assert.isNotFalse(result);
+      expect(result.type).toBe(expectedTag);
     });
   });
 });

@@ -47,7 +47,7 @@ Object.assign(plugin.configs, {
     },
     rules: {
       [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
-    }
+    },
   },
   recommended: {
     ...baseConfig,

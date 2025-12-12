@@ -217,8 +217,8 @@ describe("prepareStyledJSXModule", () => {
 
       assert.isNotNull(taggedTemplate);
       const result = module.resolveTag(taggedTemplate);
-      assert.isNotFalse(result);
-      expect(result.type).toBe(expectedTag);
+
+      expect(result).toBe(expectedTag);
     });
   });
 });

@@ -69,12 +69,14 @@
     "docs:generate": "eslint-doc-generator"
   },
   "packageManager": "pnpm@10.23.0",
+"dependencies": {
+    "@typescript-eslint/utils": "^8.49.0"
+  },
   "devDependencies": {
     "@arethetypeswrong/core": "catalog:dev",
     "@types/node": "catalog:dev",
     "@typescript-eslint/typescript-estree": "8.49.0",
-    "@typescript-eslint/utils": "8.49.0",
-    "@typescript/native-preview": "catalog:dev",
+        "@typescript/native-preview": "catalog:dev",
     "@virtual-live-lab/eslint-config": "catalog:dev",
     "@virtual-live-lab/tsconfig": "catalog:dev",
     "eslint": "catalog:dev",

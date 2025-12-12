@@ -64,6 +64,10 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      '@typescript-eslint/utils':
+        specifier: ^8.49.0
+        version: 8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
     devDependencies:
       '@arethetypeswrong/core':
         specifier: catalog:dev
@@ -74,9 +78,6 @@ importers:
       '@typescript-eslint/typescript-estree':
         specifier: 8.49.0
         version: 8.49.0(typescript@5.9.3)
-      '@typescript-eslint/utils':
-        specifier: 8.49.0
-        version: 8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
       '@typescript/native-preview':
         specifier: catalog:dev
         version: 7.0.0-dev.20251212.1

@@ -4,9 +4,10 @@ export default defineConfig({
   attw: { level: "error", profile: "esm-only" },
   clean: true,
   dts: {
+    resolve: ["type-fest"],
     tsgo: true,
   },
-  entry: [],
+  entry: ["src/index.ts"],
   fixedExtension: true,
   format: "esm",
   fromVite: true,

@@ -1,12 +1,16 @@
 // @ts-check
 
-import ts from "@virtual-live-lab/eslint-config/presets/ts";
+import react from "@virtual-live-lab/eslint-config/presets/react";
 import importAccess from "eslint-plugin-import-access/flat-config";
-import { defineConfig, globalIgnores } from "eslint/config";
+import styledJsx from "eslint-plugin-styled-jsx";
+import { defineConfig } from "eslint/config";
 
 export default defineConfig(
-  ts,
-  globalIgnores(["playground/**"]),
+  react,
+  {
+    extends: [styledJsx.configs.recommended],
+    name: "@repo/eslint-config/styled-jsx/plugin",
+  },
   {
     name: "@repo/eslint-config/import-access/plugin",
     plugins: {

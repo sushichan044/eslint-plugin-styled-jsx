@@ -3,10 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "",
+  "description": "ESLint plugin for styled-jsx",
   "sideEffects": false,
-  "license": "",
-  "keywords": [],
+  "license": "MIT",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "styled-jsx",
+    "react"
+  ],
   "homepage": "https://github.com/sushichan044/eslint-plugin-styled-jsx#readme",
   "bugs": {
     "url": "https://github.com/sushichan044/eslint-plugin-styled-jsx/issues"
@@ -55,6 +60,7 @@
   "devDependencies": {
     "@arethetypeswrong/core": "catalog:dev",
     "@types/node": "catalog:dev",
+    "@typescript-eslint/typescript-estree": "8.49.0",
     "@typescript-eslint/utils": "8.49.0",
     "@typescript/native-preview": "catalog:dev",
     "@virtual-live-lab/eslint-config": "catalog:dev",
@@ -69,10 +75,12 @@
     "release-it-pnpm": "catalog:dev",
     "styled-jsx": "5.1.7",
     "tsdown": "catalog:dev",
+    "type-fest": "5.3.1",
     "typescript": "catalog:dev",
     "typescript-eslint": "catalog:dev",
     "unplugin-unused": "catalog:dev",
     "vite": "catalog:dev",
-    "vitest": "catalog:dev"
+    "vitest": "catalog:dev",
+    "zimmerframe": "1.1.4"
   }
 }

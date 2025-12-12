@@ -29,16 +29,28 @@ const plugin: Plugin = {
   version,
 };
 
+const baseConfig = {
+  languageOptions: {
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true,
+      },
+    },
+  },
+} as const satisfies Linter.Config;
+
 Object.assign(plugin.configs, {
   all: {
+    ...baseConfig,
     plugins: {
       "styled-jsx": plugin,
     },
     rules: {
       [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
-    },
+    }
   },
   recommended: {
+    ...baseConfig,
     plugins: {
       "styled-jsx": plugin,
     },

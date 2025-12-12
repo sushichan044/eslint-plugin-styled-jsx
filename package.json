@@ -62,7 +62,7 @@
     "typecheck": "tsgo --noEmit",
     "test": "vitest --run",
     "check": "pnpm run format:check && pnpm run typecheck && pnpm run lint:check && pnpm run test && pnpm run build",
-    "build": "tsdown && eslint-doc-generator",
+    "build": "tsdown",
     "prepublishOnly": "pnpm run build",
     "pkg-pr-new": "pkg-pr-new publish --compact --comment=update --pnpm",
     "docs:generate": "eslint-doc-generator"

@@ -32,12 +32,12 @@ jobs:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
 
+      - name: Build
+        run: pnpm run build
+
       - name: ESLint Rule Docs Generation Check
         run: |
           pnpm run docs:generate --check
-
-      - name: Build
-        run: pnpm run build
 
       - name: Run ESLint
         run: pnpm run lint:check

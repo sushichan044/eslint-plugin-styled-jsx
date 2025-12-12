@@ -1,15 +1,16 @@
 {
   "name": "eslint-plugin-styled-jsx",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "description": "ESLint plugin for styled-jsx",
   "sideEffects": false,
   "license": "MIT",
   "keywords": [
     "eslint",
+    "eslint plugin",
     "eslint-plugin",
     "styled-jsx",
+    "styled-jsx eslint plugin",
     "react"
   ],
   "homepage": "https://github.com/sushichan044/eslint-plugin-styled-jsx#readme",

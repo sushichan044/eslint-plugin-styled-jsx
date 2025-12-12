@@ -1,4 +1,4 @@
-# Disallow dynamic values in `styled-jsx/css` tags except `css.resolve` (`styled-jsx/require-resolve-for-dynamic-external-css`)
+# Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags (`styled-jsx/require-resolve-for-dynamic-external-css`)
 
 💼 This rule is enabled in the following configs: 🌐 `all`, ✅ `recommended`.
 
@@ -6,9 +6,11 @@
 
 ## Rule Details
 
+This rule reports dynamic values in external style tags and tells you to switch to `css.resolve`.
+
 External styles created with `styled-jsx/css` do **not** accept dynamic interpolations when you use `css` or `css.global`.
 
-Only [`css.resolve`](https://github.com/vercel/styled-jsx?tab=readme-ov-file#the-resolve-tag) supports dynamic values at runtime.
+Only [`css.resolve`](https://github.com/vercel/styled-jsx?tab=readme-ov-file#the-resolve-tag) supports dynamic interpolations at runtime.
 
 ### ❌ Incorrect
 

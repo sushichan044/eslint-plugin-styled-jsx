@@ -61,7 +61,7 @@ await run({
       errors: [
         {
           data: { tagType: "css" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "default css tag with dynamic values",
@@ -74,7 +74,7 @@ await run({
       errors: [
         {
           data: { tagType: "css.global" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "css.global tag with dynamic values",
@@ -87,7 +87,7 @@ await run({
       errors: [
         {
           data: { tagType: "css" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "aliased default import with dynamic values",
@@ -100,7 +100,7 @@ await run({
       errors: [
         {
           data: { tagType: "css.global" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "named import global tag with dynamic values",
@@ -113,7 +113,7 @@ await run({
       errors: [
         {
           data: { tagType: "css" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "multiple dynamic values",
@@ -126,7 +126,7 @@ await run({
       errors: [
         {
           data: { tagType: "css.global" },
-          messageId: "noDynamicExternalStyleExceptResolveTag",
+          messageId: "requireResolveForDynamicExternalCSS",
         },
       ],
       name: "css.global with aliased import and dynamic values",

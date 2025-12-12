@@ -38,11 +38,12 @@ export default createRule<Options, MessageIds>({
   defaultOptions: [],
   meta: {
     docs: {
-      description: "Disallow dynamic values in `styled-jsx/css` tags except `css.resolve`.",
+      description:
+        "Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags.",
     },
     messages: {
       requireResolveForDynamicExternalCSS:
-        "Dynamic values are not allowed in `{{tagType}}` tag. Use `css.resolve` tag to use dynamic values.",
+        "Dynamic values are not allowed in external `{{tagType}}` tag. Use `css.resolve` for dynamic external styles.",
     },
     schema: [],
     type: "problem",

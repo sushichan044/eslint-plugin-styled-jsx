@@ -1,2 +1,2 @@
-export const RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG =
-  "no-dynamic-external-style-except-resolve-tag";
+export const RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS =
+  "require-resolve-for-dynamic-external-css";

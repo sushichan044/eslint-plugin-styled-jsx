@@ -1,11 +1,11 @@
 import type { StyledJSXModule } from "../styled-jsx";
 
-import { RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG } from "../constants";
+import { RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS } from "../constants";
 import { prepareStyledJSXModule } from "../styled-jsx";
 import { createRule } from "../utils";
 
 type Options = [];
-type MessageIds = "noDynamicExternalStyleExceptResolveTag";
+type MessageIds = "requireResolveForDynamicExternalCSS";
 
 export default createRule<Options, MessageIds>({
   create: (context) => {
@@ -28,7 +28,7 @@ export default createRule<Options, MessageIds>({
             data: {
               tagType: tag.type,
             },
-            messageId: "noDynamicExternalStyleExceptResolveTag",
+            messageId: "requireResolveForDynamicExternalCSS",
             node,
           });
         }
@@ -41,11 +41,11 @@ export default createRule<Options, MessageIds>({
       description: "Disallow dynamic values in `styled-jsx/css` tags except `css.resolve`.",
     },
     messages: {
-      noDynamicExternalStyleExceptResolveTag:
+      requireResolveForDynamicExternalCSS:
         "Dynamic values are not allowed in `{{tagType}}` tag. Use `css.resolve` tag to use dynamic values.",
     },
     schema: [],
     type: "problem",
   },
-  name: RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG,
+  name: RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS,
 });

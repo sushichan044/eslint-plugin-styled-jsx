@@ -2,14 +2,12 @@ import type { ESLint, Linter } from "eslint";
 import type { Except } from "type-fest";
 
 import { name, version } from "../package.json" with { type: "json" };
-import { RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG } from "./constants";
-import noDynamicExternalStyleExceptResolveTag from "./rules/no-dynamic-external-style-except-resolve-tag";
+import { RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS } from "./constants";
+import requireResolveForDynamicExternalCSS from "./rules/require-resolve-for-dynamic-external-css";
 import { compat } from "./utils";
 
 const rules = {
-  [RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG]: compat(
-    noDynamicExternalStyleExceptResolveTag,
-  ),
+  [RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS]: compat(requireResolveForDynamicExternalCSS),
 } as const;
 
 type Plugin = Except<ESLint.Plugin, "configs"> & {
@@ -37,7 +35,7 @@ Object.assign(plugin, {
         "styled-jsx": plugin,
       },
       rules: {
-        [`styled-jsx/${RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG}`]: "error",
+        [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
       },
     },
     recommended: {
@@ -45,7 +43,7 @@ Object.assign(plugin, {
         "styled-jsx": plugin,
       },
       rules: {
-        [`styled-jsx/${RULE_NO_DYNAMIC_EXTERNAL_STYLE_EXCEPT_RESOLVE_TAG}`]: "error",
+        [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
       },
     },
   },

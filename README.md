@@ -60,9 +60,9 @@ export default defineConfig({
 🌐 Set in the `all` configuration.\
 ✅ Set in the `recommended` configuration.
 
-| Name                                                                                                       | Description                                                            | 💼    |
-| :--------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :---- |
-| [no-dynamic-external-style-except-resolve-tag](docs/rules/no-dynamic-external-style-except-resolve-tag.md) | Disallow dynamic values in `styled-jsx/css` tags except `css.resolve`. | 🌐 ✅ |
+| Name                                                                                               | Description                                                            | 💼    |
+| :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :---- |
+| [require-resolve-for-dynamic-external-css](docs/rules/require-resolve-for-dynamic-external-css.md) | Disallow dynamic values in `styled-jsx/css` tags except `css.resolve`. | 🌐 ✅ |
 
 <!-- end auto-generated rules list -->
 

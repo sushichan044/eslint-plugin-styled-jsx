@@ -1,9 +1,10 @@
 import { run } from "eslint-vitest-rule-tester";
 
-import rule from "./no-dynamic-external-style-except-resolve-tag";
+import { RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS } from "../constants";
+import rule from "./require-resolve-for-dynamic-external-css";
 
 await run({
-  name: "no-dynamic-external-style-except-resolve-tag",
+  name: RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS,
   rule,
 
   valid: [

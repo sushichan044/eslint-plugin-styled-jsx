@@ -6,7 +6,7 @@ import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
 
 export const createRule = ESLintUtils.RuleCreator(
   (ruleName) =>
-    `https://github.com/sushichan044/eslint-plugin-styled-jsx/blob/main/rules/${ruleName}.ts`,
+    `https://github.com/sushichan044/eslint-plugin-styled-jsx/blob/main/docs/rules/${ruleName}.md`,
 );
 
 export function compat(rule: AnyRuleModule): Rule.RuleModule {

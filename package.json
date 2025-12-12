@@ -41,13 +41,13 @@
   "exports": {
     ".": {
       "import": {
-      "types": "./dist/index.d.mts",
-      "default": "./dist/index.mjs"
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
       },
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
-}
+      }
     },
     "./package.json": "./package.json"
   },
@@ -78,6 +78,7 @@
     "@virtual-live-lab/tsconfig": "catalog:dev",
     "eslint": "catalog:dev",
     "eslint-doc-generator": "2.4.0",
+    "eslint-plugin-eslint-plugin": "7.2.0",
     "eslint-plugin-import-access": "catalog:dev",
     "eslint-vitest-rule-tester": "3.0.0",
     "oxfmt": "catalog:dev",

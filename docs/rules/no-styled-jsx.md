@@ -20,7 +20,11 @@ import css from "styled-jsx/css";
 ```tsx
 const Component = () => (
   <>
-    <style jsx>{`div { color: red; }`}</style>
+    <style jsx>{`
+      div {
+        color: red;
+      }
+    `}</style>
     {/* ^ Attribute `jsx` on <style> is not allowed. */}
     <div>Hello</div>
   </>

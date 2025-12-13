@@ -1,6 +1,6 @@
 import css from "styled-jsx/css";
 
-const c = ((ccc: string) => "#ccc" as const)
+const c = (ccc: string) => "#ccc" as const;
 
 const getStyles = (color: string) => css.resolve`
   .text {

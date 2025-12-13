@@ -41,14 +41,27 @@ export default defineConfig({
 });
 ```
 
-### All
+### Prohibit
+
+Next.js projects may use `styled-jsx` by default, but in some cases, you may want to prohibit its usage entirely.
 
 ```ts
 import { defineConfig } from "eslint/config";
 import styledJSX from "eslint-plugin-styled-jsx";
 
 export default defineConfig({
-  extends: [styledJSX.configs.all],
+  extends: [styledJSX.configs.prohibit],
+});
+```
+
+### Strict
+
+```ts
+import { defineConfig } from "eslint/config";
+import styledJSX from "eslint-plugin-styled-jsx";
+
+export default defineConfig({
+  extends: [styledJSX.configs.strict],
 });
 ```
 
@@ -57,11 +70,13 @@ export default defineConfig({
 <!-- begin auto-generated rules list -->
 
 💼 Configurations enabled in.\
+💥 Set in the `prohibit` configuration.\
 ✅ Set in the `recommended` configuration.\
 🔒 Set in the `strict` configuration.
 
 | Name                                                                                               | Description                                                                        | 💼    |
 | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- | :---- |
+| [no-styled-jsx](docs/rules/no-styled-jsx.md)                                                       | Prohibit the use of `styled-jsx`.                                                  | 💥    |
 | [require-resolve-for-dynamic-external-css](docs/rules/require-resolve-for-dynamic-external-css.md) | Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags. | ✅ 🔒 |
 
 <!-- end auto-generated rules list -->

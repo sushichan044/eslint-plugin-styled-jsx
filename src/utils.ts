@@ -38,3 +38,20 @@ export function extractModuleImports(
 
   return imports;
 }
+
+/**
+ * Check whether the given JSX opening element is a `<style>` element.
+ */
+export function isStyleElement(node: TSESTree.JSXOpeningElement): boolean {
+  if (node.name.type === AST_NODE_TYPES.JSXIdentifier && node.name.name === "style") {
+    return true;
+  }
+  return false;
+}
+
+export function isStyledJSXImport(moduleRequest: unknown): moduleRequest is string {
+  return (
+    typeof moduleRequest === "string" &&
+    (moduleRequest === "styled-jsx" || moduleRequest.startsWith("styled-jsx/"))
+  );
+}

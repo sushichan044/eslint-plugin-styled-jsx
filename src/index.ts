@@ -2,16 +2,19 @@ import type { ESLint, Linter } from "eslint";
 import type { Except } from "type-fest";
 
 import { name, version } from "../package.json" with { type: "json" };
-import { RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS } from "./constants";
+import { RULE_NO_STYLED_JSX, RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS } from "./constants";
+import noStyledJSX from "./rules/no-styled-jsx";
 import requireResolveForDynamicExternalCSS from "./rules/require-resolve-for-dynamic-external-css";
 import { compat } from "./utils";
 
 const rules = {
+  [RULE_NO_STYLED_JSX]: compat(noStyledJSX),
   [RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS]: compat(requireResolveForDynamicExternalCSS),
 } as const;
 
 type Plugin = Except<ESLint.Plugin, "configs"> & {
   configs: {
+    prohibit: Linter.Config | Linter.Config[];
     recommended: Linter.Config | Linter.Config[];
     strict: Linter.Config | Linter.Config[];
   };
@@ -40,6 +43,15 @@ const baseConfig = {
 } as const satisfies Linter.Config;
 
 Object.assign(plugin.configs, {
+  prohibit: {
+    ...baseConfig,
+    plugins: {
+      "styled-jsx": plugin,
+    },
+    rules: {
+      [`styled-jsx/${RULE_NO_STYLED_JSX}`]: "error",
+    },
+  },
   recommended: {
     ...baseConfig,
     plugins: {

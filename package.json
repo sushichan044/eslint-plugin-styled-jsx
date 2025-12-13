@@ -53,7 +53,8 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "eslint": ">=8.57.0"
+    "eslint": ">=8.57.0",
+    "styled-jsx": "^5.0.0"
   },
   "scripts": {
     "lint": "eslint --max-warnings 0 --fix",
@@ -70,10 +71,12 @@
   },
   "packageManager": "pnpm@10.23.0",
   "dependencies": {
+    "@babel/core": "^7.28.5",
     "@typescript-eslint/utils": "^8.49.0"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "catalog:dev",
+    "@types/babel__core": "^7.20.5",
     "@types/node": "catalog:dev",
     "@typescript-eslint/typescript-estree": "8.49.0",
     "@typescript/native-preview": "catalog:dev",
@@ -89,7 +92,7 @@
     "publint": "catalog:dev",
     "release-it": "catalog:dev",
     "release-it-pnpm": "catalog:dev",
-    "styled-jsx": "5.1.7",
+    "styled-jsx": "^5.1.7",
     "tinyexec": "1.0.2",
     "tsdown": "catalog:dev",
     "type-fest": "5.3.1",

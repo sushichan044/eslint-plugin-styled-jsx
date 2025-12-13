@@ -65,6 +65,9 @@ importers:
 
   .:
     dependencies:
+      '@babel/core':
+        specifier: ^7.28.5
+        version: 7.28.5
       '@typescript-eslint/utils':
         specifier: ^8.49.0
         version: 8.49.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -72,6 +75,9 @@ importers:
       '@arethetypeswrong/core':
         specifier: catalog:dev
         version: 0.18.2
+      '@types/babel__core':
+        specifier: ^7.20.5
+        version: 7.20.5
       '@types/node':
         specifier: catalog:dev
         version: 25.0.1
@@ -118,7 +124,7 @@ importers:
         specifier: catalog:dev
         version: 4.6.6(release-it@19.1.0(@types/node@25.0.1))
       styled-jsx:
-        specifier: 5.1.7
+        specifier: ^5.1.7
         version: 5.1.7(@babel/core@7.28.5)(react@19.2.3)
       tinyexec:
         specifier: 1.0.2

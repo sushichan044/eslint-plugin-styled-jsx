@@ -57,12 +57,12 @@ export default defineConfig({
 <!-- begin auto-generated rules list -->
 
 💼 Configurations enabled in.\
-🌐 Set in the `all` configuration.\
-✅ Set in the `recommended` configuration.
+✅ Set in the `recommended` configuration.\
+🔒 Set in the `strict` configuration.
 
 | Name                                                                                               | Description                                                                        | 💼    |
 | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- | :---- |
-| [require-resolve-for-dynamic-external-css](docs/rules/require-resolve-for-dynamic-external-css.md) | Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags. | 🌐 ✅ |
+| [require-resolve-for-dynamic-external-css](docs/rules/require-resolve-for-dynamic-external-css.md) | Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags. | ✅ 🔒 |
 
 <!-- end auto-generated rules list -->
 

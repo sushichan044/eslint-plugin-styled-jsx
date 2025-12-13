@@ -1,6 +1,6 @@
 # Require `css.resolve` when using dynamic values in external `styled-jsx/css` tags (`styled-jsx/require-resolve-for-dynamic-external-css`)
 
-💼 This rule is enabled in the following configs: 🌐 `all`, ✅ `recommended`.
+💼 This rule is enabled in the following configs: ✅ `recommended`, 🔒 `strict`.
 
 <!-- end auto-generated rule header -->
 

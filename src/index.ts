@@ -12,8 +12,8 @@ const rules = {
 
 type Plugin = Except<ESLint.Plugin, "configs"> & {
   configs: {
-    all: Linter.Config | Linter.Config[];
     recommended: Linter.Config | Linter.Config[];
+    strict: Linter.Config | Linter.Config[];
   };
 };
 
@@ -40,7 +40,7 @@ const baseConfig = {
 } as const satisfies Linter.Config;
 
 Object.assign(plugin.configs, {
-  all: {
+  recommended: {
     ...baseConfig,
     plugins: {
       "styled-jsx": plugin,
@@ -49,7 +49,7 @@ Object.assign(plugin.configs, {
       [`styled-jsx/${RULE_REQUIRE_RESOLVE_FOR_DYNAMIC_EXTERNAL_CSS}`]: "error",
     },
   },
-  recommended: {
+  strict: {
     ...baseConfig,
     plugins: {
       "styled-jsx": plugin,

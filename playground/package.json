@@ -2,16 +2,25 @@
   "name": "@repo/playground",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
   "devDependencies": {
     "@types/node": "catalog:dev",
     "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.2",
     "eslint": "catalog:dev",
     "eslint-plugin-styled-jsx": "workspace:^",
     "react": "19.2.3",
     "typescript": "catalog:dev",
-    "typescript-eslint": "catalog:dev"
+    "typescript-eslint": "catalog:dev",
+    "vite": "7.2.7",
+    "vite-plugin-babel": "1.3.2"
   },
   "dependencies": {
+    "react-dom": "19.2.3",
+    "react-error-boundary": "6.0.0",
     "styled-jsx": "5.1.7"
   }
 }

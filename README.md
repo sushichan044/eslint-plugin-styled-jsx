@@ -43,7 +43,7 @@ export default defineConfig({
 
 ### Prohibit
 
-Next.js projects may use `styled-jsx` by default, but in some cases, you may want to prohibit its usage entirely.
+Next.js setup `styled-jsx` by default. If you want to prohibit its usage, use this configuration.
 
 ```ts
 import { defineConfig } from "eslint/config";

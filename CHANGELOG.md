@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.0
+
+### &nbsp;&nbsp;&nbsp;Breaking Changes
+
+- Rename all config to `strict` &nbsp;-&nbsp; by **sushichan044** [<samp>(b1f33)</samp>](https://github.com/sushichan044/eslint-plugin-styled-jsx/commit/b1f33de)
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- Add `no-styled-jsx` rule and `prohibit` config to avoid use of styled-jsx &nbsp;-&nbsp; by **sushichan044** [<samp>(42e3f)</samp>](https://github.com/sushichan044/eslint-plugin-styled-jsx/commit/42e3ff1)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/sushichan044/eslint-plugin-styled-jsx/compare/0.0.3...0.1.0)
+
 ## 0.0.3
 
 ### &nbsp;&nbsp;&nbsp;Bug Fixes

@@ -16,6 +16,14 @@ const getStyles = (color: string) => {
   `;
 };
 
+const dyn2 = (isDark: boolean) => css`
+    .dynamic2 {
+      background-color: ${isDark ? "black" : "white"};
+    }
+  `;
+
+
+
 export const App = () => {
   const css = getStyles("blue");
 

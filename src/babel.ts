@@ -1,14 +1,5 @@
 import { transformSync } from "@babel/core";
 
-interface BabelError extends Error {
-  loc: {
-    column: number;
-    line: number;
-  };
-  message: string;
-  reasonCode: string;
-}
-
 export interface StyledJSXBabelError {
   loc: {
     end: {
@@ -19,16 +10,18 @@ export interface StyledJSXBabelError {
       column: number;
       line: number;
     };
-  } | null;
+  };
   message: string;
+}
+
+interface LintLogger {
+  log(err: StyledJSXBabelError): void;
 }
 
 // https://github.com/vercel/styled-jsx/blob/d7a59379134d73afaeb98177387cd62d54d746be/src/_utils.js#L641-L664
 interface TransformOptions {
   styledJSXOptions?: {
-    __lint?: {
-      errors: StyledJSXBabelError[];
-    };
+    __lint?: LintLogger;
     plugins?: Array<string | [string, Record<string, unknown>]>;
     sourceMaps?: boolean;
     /**
@@ -57,6 +50,12 @@ export function tryTransformWithBabel(
   options?: TransformOptions,
 ): TransformResult {
   const lintErrors: StyledJSXBabelError[] = [];
+  const logger: LintLogger = {
+    log: (err: StyledJSXBabelError) => {
+      lintErrors.push(err);
+    },
+  };
+
   try {
     transformSync(code, {
       babelrc: false,
@@ -73,10 +72,7 @@ export function tryTransformWithBabel(
           "styled-jsx/babel",
           {
             ...options?.styledJSXOptions,
-            __lint: {
-              ...options?.styledJSXOptions?.__lint,
-              errors: lintErrors,
-            },
+            __lint: logger,
           },
         ],
       ],
@@ -85,27 +81,4 @@ export function tryTransformWithBabel(
   } catch (e) {
     return { error: e, isError: true, lintErrors };
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isBabelError(error: unknown): error is BabelError {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "reasonCode" in error &&
-    "message" in error &&
-    "loc" in error &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc === "object" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    (error as any).loc !== null &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    "line" in (error as any).loc &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc.line === "number" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    "column" in (error as any).loc &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc.column === "number"
-  );
 }

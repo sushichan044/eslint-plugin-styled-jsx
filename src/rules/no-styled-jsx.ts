@@ -1,7 +1,7 @@
 import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 
 import { RULE_NO_STYLED_JSX } from "../constants";
-import { createRule, isStyledJSXImport, isStyleElement } from "../utils";
+import { createRule, isHTMLOpeningElement, isStyledJSXImport } from "../utils";
 
 type Options = [];
 type MessageIds = "noStyledJSXAttribute" | "noStyledJSXImport";
@@ -35,7 +35,7 @@ export default createRule<Options, MessageIds>({
 
       JSXAttribute: (node) => {
         const tag = node.parent;
-        if (!isStyleElement(tag)) {
+        if (!isHTMLOpeningElement(tag, "style")) {
           return;
         }
         if (node.name.type !== AST_NODE_TYPES.JSXIdentifier) {

@@ -69,6 +69,24 @@ await run({
       name: "default import from styled-jsx/css",
     },
     {
+      code: `import css from "styled-jsx/css.js";`,
+      errors: [
+        {
+          messageId: "noStyledJSXImport",
+        },
+      ],
+      name: "default import with .js from styled-jsx/css",
+    },
+    {
+      code: `import css from "styled-jsx/css.mjs";`,
+      errors: [
+        {
+          messageId: "noStyledJSXImport",
+        },
+      ],
+      name: "default import with .mjs from styled-jsx/css",
+    },
+    {
       code: `import { resolve } from "styled-jsx/css";`,
       errors: [
         {

@@ -57,4 +57,4 @@ export function isStyledJSXImport(moduleRequest: unknown): moduleRequest is stri
   );
 }
 
-const subpathRegex = regex("^styled-jsx\/css(?:\.m?js)?$");
+const subpathRegex = regex("^styled-jsx\/(babel|css|style)(?:\.m?js)?$");

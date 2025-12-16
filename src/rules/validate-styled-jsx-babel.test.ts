@@ -99,11 +99,11 @@ await run({
       `,
       errors: [
         {
-          line: 4,
+          line: 3,
           messageId: "babelCompilationError",
         },
         {
-          line: 7,
+          line: 6,
           messageId: "babelCompilationError",
         },
       ],

@@ -20,6 +20,7 @@ const getStyles = (color: string) => {
 const dyn2 = (isDark: boolean) => css`
     .dynamic2 {
       background-color: ${isDark};
+      width: ${isDark ? "100px" : "200px"};
     }
   `;
 
@@ -46,7 +47,7 @@ const ss = (s: SS) => {
         }
       `;
   }
-}
+};
 
 export const App = () => {
   const css = getStyles("blue");

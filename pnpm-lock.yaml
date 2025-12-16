@@ -61,11 +61,6 @@ catalogs:
       specifier: ^4.0.15
       version: 4.0.15
 
-patchedDependencies:
-  styled-jsx@5.1.7:
-    hash: de829bc79d4f462194d5cb3bcaa01755c08903eda6889e4c014c70f22d1fa5e7
-    path: patches/styled-jsx@5.1.7.patch
-
 importers:
 
   .:
@@ -139,7 +134,7 @@ importers:
         version: 4.6.6(release-it@19.1.0(@types/node@25.0.1))
       styled-jsx:
         specifier: ^5.1.7
-        version: 5.1.7(patch_hash=de829bc79d4f462194d5cb3bcaa01755c08903eda6889e4c014c70f22d1fa5e7)(@babel/core@7.28.5)(react@19.2.3)
+        version: 5.1.7(@babel/core@7.28.5)(react@19.2.3)
       tinyexec:
         specifier: 1.0.2
         version: 1.0.2
@@ -178,7 +173,7 @@ importers:
         version: 6.0.0(react@19.2.3)
       styled-jsx:
         specifier: 5.1.7
-        version: 5.1.7(patch_hash=de829bc79d4f462194d5cb3bcaa01755c08903eda6889e4c014c70f22d1fa5e7)(@babel/core@7.28.5)(react@19.2.3)
+        version: 5.1.7(@babel/core@7.28.5)(react@19.2.3)
     devDependencies:
       '@types/node':
         specifier: catalog:dev
@@ -7638,7 +7633,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  styled-jsx@5.1.7(patch_hash=de829bc79d4f462194d5cb3bcaa01755c08903eda6889e4c014c70f22d1fa5e7)(@babel/core@7.28.5)(react@19.2.3):
+  styled-jsx@5.1.7(@babel/core@7.28.5)(react@19.2.3):
     dependencies:
       client-only: 0.0.1
       react: 19.2.3

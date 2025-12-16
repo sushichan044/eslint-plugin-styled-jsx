@@ -1,3 +1,4 @@
+/* eslint-disable styled-jsx/require-resolve-for-dynamic-external-css */
 import css from "styled-jsx/css";
 
 const getStyles = (color: string) => {
@@ -18,11 +19,34 @@ const getStyles = (color: string) => {
 
 const dyn2 = (isDark: boolean) => css`
     .dynamic2 {
-      background-color: ${isDark ? "black" : "white"};
+      background-color: ${isDark};
     }
   `;
 
+type SS = "a" | "b" | "c";
 
+const ss = (s: SS) => {
+  switch (s) {
+    case "a":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "black" : "white"};
+        }
+      `;
+    case "b":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "red" : "blue"};
+        }
+      `;
+    case "c":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "green" : "yellow"};
+        }
+      `;
+  }
+}
 
 export const App = () => {
   const css = getStyles("blue");

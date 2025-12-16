@@ -9,9 +9,26 @@ interface BabelError extends Error {
   reasonCode: string;
 }
 
+export interface StyledJSXBabelError {
+  loc: {
+    end: {
+      column: number;
+      line: number;
+    };
+    start: {
+      column: number;
+      line: number;
+    };
+  } | null;
+  message: string;
+}
+
 // https://github.com/vercel/styled-jsx/blob/d7a59379134d73afaeb98177387cd62d54d746be/src/_utils.js#L641-L664
 interface TransformOptions {
-  styledJSXOptions: {
+  styledJSXOptions?: {
+    __lint?: {
+      errors: StyledJSXBabelError[];
+    };
     plugins?: Array<string | [string, Record<string, unknown>]>;
     sourceMaps?: boolean;
     /**
@@ -27,9 +44,11 @@ type TransformResult =
   | {
       error: unknown;
       isError: true;
+      lintErrors: StyledJSXBabelError[];
     }
   | {
       isError: false;
+      lintErrors: StyledJSXBabelError[];
     };
 
 export function tryTransformWithBabel(
@@ -37,6 +56,7 @@ export function tryTransformWithBabel(
   filepath: string,
   options?: TransformOptions,
 ): TransformResult {
+  const lintErrors: StyledJSXBabelError[] = [];
   try {
     transformSync(code, {
       babelrc: false,
@@ -53,13 +73,17 @@ export function tryTransformWithBabel(
           "styled-jsx/babel",
           {
             ...options?.styledJSXOptions,
+            __lint: {
+              ...options?.styledJSXOptions?.__lint,
+              errors: lintErrors,
+            },
           },
         ],
       ],
     });
-    return { isError: false };
+    return { isError: false, lintErrors };
   } catch (e) {
-    return { error: e, isError: true };
+    return { error: e, isError: true, lintErrors };
   }
 }
 

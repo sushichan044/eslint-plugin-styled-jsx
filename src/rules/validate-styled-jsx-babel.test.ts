@@ -86,7 +86,28 @@ await run({
     },
   ],
 
-  // TODO: Add invalid test cases when real-world error cases are discovered.
-  // styled-jsx's Babel plugin is permissive and doesn't throw errors for most CSS syntax errors.
-  invalid: [],
+  invalid: [
+    {
+      code: `
+        import css from 'styled-jsx/css';
+        const styles = css\`
+          div { color: \${unknownColor}; }
+        \`;
+        const other = css\`
+          span { color: \${anotherUnknown}; }
+        \`;
+      `,
+      errors: [
+        {
+          line: 4,
+          messageId: "babelCompilationError",
+        },
+        {
+          line: 7,
+          messageId: "babelCompilationError",
+        },
+      ],
+      name: "reports multiple styled-jsx errors in a single pass",
+    },
+  ],
 });

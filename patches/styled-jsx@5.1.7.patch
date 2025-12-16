@@ -1,0 +1,393 @@
+diff --git a/dist/babel/index.js b/dist/babel/index.js
+index ece0fd62fa168f667d1498c8a54fdfed6d2ac093..d7f383f7a27c7856f5217bba1299f37b727e336f 100644
+--- a/dist/babel/index.js
++++ b/dist/babel/index.js
+@@ -21492,6 +21492,25 @@ var isStyledJsx = function(param) {
+         return attr.name.name === STYLE_ATTRIBUTE;
+     });
+ };
++var currentThrowOrCollect = null;
++/**
++ * @type {((path: any, buildError: Error | (() => Error)) => void) | null}
++ * Holds the lint-aware forwarder set inside `babel()` at Program.enter.
++ */
++/**
++ * Dispatch error either to lint collection (when currentThrowOrCollect is set)
++ * or throw immediately when lint mode is not active.
++ * @param {*} path Babel path
++ * @param {Error|(() => Error)} buildError
++ */
++var emitLintError = function(path, buildError) {
++    if (currentThrowOrCollect) {
++        currentThrowOrCollect(path, buildError);
++        return;
++    }
++    var error = typeof buildError === "function" ? buildError() : buildError;
++    throw error;
++};
+ var findStyles = function(path) {
+     if (isStyledJsx(path)) {
+         var node = path.node;
+@@ -21508,7 +21527,9 @@ var validateExternalExpressionsVisitor = {
+         }
+         var name = path.node.name;
+         if (!path.scope.hasBinding(name)) {
+-            throw path.buildCodeFrameError(path.getSource());
++            emitLintError(path, function() {
++                return path.buildCodeFrameError(path.getSource());
++            });
+         }
+     },
+     MemberExpression: function MemberExpression(path) {
+@@ -21517,18 +21538,24 @@ var validateExternalExpressionsVisitor = {
+             return;
+         }
+         if (!path.scope.hasBinding(node.object.name)) {
+-            throw path.buildCodeFrameError(path.getSource());
++            emitLintError(path, function() {
++                return path.buildCodeFrameError(path.getSource());
++            });
+         }
+     },
+     ThisExpression: function ThisExpression(path) {
+-        throw new Error(path.parentPath.getSource());
++        emitLintError(path, function() {
++            return new Error(path.parentPath.getSource());
++        });
+     }
+ };
+ var validateExternalExpressions = function(path) {
+     try {
+         path.traverse(validateExternalExpressionsVisitor);
+     } catch (error) {
+-        throw path.buildCodeFrameError("\n      Found an `undefined` or invalid value in your styles: `" + error.message + "`.\n\n      If you are trying to use dynamic styles in external files this is unfortunately not possible yet.\n      Please put the dynamic parts alongside the component. E.g.\n\n      <button>\n        <style jsx>{externalStylesReference}</style>\n        <style jsx>{`\n          button { background-color: ${" + error.message + "} }\n        `}</style>\n      </button>\n    ");
++        emitLintError(path, function() {
++            return path.buildCodeFrameError("\n      Found an `undefined` or invalid value in your styles: `" + error.message + "`.\n\n      If you are trying to use dynamic styles in external files this is unfortunately not possible yet.\n      Please put the dynamic parts alongside the component. E.g.\n\n      <button>\n        <style jsx>{externalStylesReference}</style>\n        <style jsx>{`\n          button { background-color: ${" + error.message + "} }\n        `}</style>\n      </button>\n    ");
++        });
+     }
+ };
+ var getJSXStyleInfo = function(expr, scope) {
+@@ -21879,8 +21906,13 @@ function _extends$1() {
+     return _extends$1.apply(this, arguments);
+ }
+ var isModuleExports = lib$1.buildMatchMemberExpression("module.exports");
++/**
++ * Process a styled-jsx tagged template (css/global/resolve). When lint mode is active,
++ * we short-circuit after collecting errors so the AST is not mutated.
++ * @param {{ type: string, path: any, file: any, splitRules: boolean, plugins: any, vendorPrefixes: boolean, sourceMaps: boolean, styleComponentImportName: string, lintState?: { errors: any[] | null } }} param
++ */
+ function processTaggedTemplateExpression(param) {
+-    var type = param.type, path = param.path, file = param.file, splitRules = param.splitRules, plugins = param.plugins, vendorPrefixes = param.vendorPrefixes, sourceMaps = param.sourceMaps, styleComponentImportName = param.styleComponentImportName;
++    var type = param.type, path = param.path, file = param.file, splitRules = param.splitRules, plugins = param.plugins, vendorPrefixes = param.vendorPrefixes, sourceMaps = param.sourceMaps, styleComponentImportName = param.styleComponentImportName, lintState = param.lintState;
+     var templateLiteral = path.get("quasi");
+     var scope;
+     // Check whether there are undefined references or
+@@ -21917,6 +21949,9 @@ function processTaggedTemplateExpression(param) {
+         ]));
+         return;
+     }
++    if (lintState && lintState.errors) {
++        return;
++    }
+     var id = path.parentPath.node.id;
+     var baseExportName = id ? id.name : "default";
+     var parentPath = baseExportName === "default" ? path.parentPath : path.findParent(function(path) {
+@@ -21947,87 +21982,96 @@ function addHash(exportIdentifier, hash) {
+     var value = typeof hash === "string" ? lib$1.stringLiteral(hash) : hash;
+     return lib$1.expressionStatement(lib$1.assignmentExpression("=", lib$1.memberExpression(exportIdentifier, lib$1.identifier("__hash")), value));
+ }
+-var visitor = {
+-    ImportDeclaration: function ImportDeclaration(path, state) {
+-        // import css from 'styled-jsx/css'
+-        if (path.node.source.value !== "styled-jsx/css") {
+-            return;
+-        }
+-        // Find all the imported specifiers.
+-        // e.g import css, { global, resolve } from 'styled-jsx/css'
+-        // -> ['css', 'global', 'resolve']
+-        var specifiersNames = path.node.specifiers.map(function(specifier) {
+-            return specifier.local.name;
+-        });
+-        specifiersNames.forEach(function(tagName) {
+-            // Get all the reference paths i.e. the places that use the tagName above
+-            // eg.
+-            // css`div { color: red }`
+-            // css.global`div { color: red }`
+-            // global`div { color: red `
+-            var binding = path.scope.getBinding(tagName);
+-            if (!binding || !Array.isArray(binding.referencePaths)) {
++/**
++ * Build the visitor that finds styled-jsx usages; shares a lintState buffer per file.
++ * @param {{ errors: any[] | null }} lintState
++ */
++var createExternalVisitor = function(lintState) {
++    var visitor = {
++        ImportDeclaration: function ImportDeclaration(path, state) {
++            // import css from 'styled-jsx/css'
++            if (path.node.source.value !== "styled-jsx/css") {
+                 return;
+             }
+-            // Produces an object containing all the TaggedTemplateExpression paths detected.
+-            // The object contains { scoped, global, resolve }
+-            var taggedTemplateExpressions = binding.referencePaths.map(function(ref) {
+-                return ref.parentPath;
+-            }).reduce(function(result, path) {
+-                var taggedTemplateExpression;
+-                if (path.isTaggedTemplateExpression()) {
+-                    // css`` global`` resolve``
+-                    taggedTemplateExpression = path;
+-                } else if (path.parentPath && path.isMemberExpression() && path.parentPath.isTaggedTemplateExpression()) {
+-                    // This part is for css.global`` or css.resolve``
+-                    // using the default import css
+-                    taggedTemplateExpression = path.parentPath;
+-                } else {
+-                    return result;
+-                }
+-                var tag = taggedTemplateExpression.get("tag");
+-                var id = tag.isIdentifier() ? tag.node.name : tag.get("property").node.name;
+-                if (result[id]) {
+-                    result[id].push(taggedTemplateExpression);
+-                } else {
+-                    result.scoped.push(taggedTemplateExpression);
+-                }
+-                return result;
+-            }, {
+-                scoped: [],
+-                global: [],
+-                resolve: []
++            // Find all the imported specifiers.
++            // e.g import css, { global, resolve } from 'styled-jsx/css'
++            // -> ['css', 'global', 'resolve']
++            var specifiersNames = path.node.specifiers.map(function(specifier) {
++                return specifier.local.name;
+             });
+-            var hasJSXStyle = false;
+-            var _opts = state.opts, vendorPrefixes = _opts.vendorPrefixes, sourceMaps = _opts.sourceMaps;
+-            Object.keys(taggedTemplateExpressions).forEach(function(type) {
+-                return taggedTemplateExpressions[type].forEach(function(path) {
+-                    hasJSXStyle = true;
+-                    // Process each css block
+-                    processTaggedTemplateExpression({
+-                        type: type,
+-                        path: path,
+-                        file: state.file,
+-                        splitRules: typeof state.opts.optimizeForSpeed === "boolean" ? state.opts.optimizeForSpeed : process.env.NODE_ENV === "production",
+-                        plugins: state.plugins,
+-                        vendorPrefixes: vendorPrefixes,
+-                        sourceMaps: sourceMaps,
+-                        styleComponentImportName: state.styleComponentImportName
++            specifiersNames.forEach(function(tagName) {
++                // Get all the reference paths i.e. the places that use the tagName above
++                // eg.
++                // css`div { color: red }`
++                // css.global`div { color: red }`
++                // global`div { color: red `
++                var binding = path.scope.getBinding(tagName);
++                if (!binding || !Array.isArray(binding.referencePaths)) {
++                    return;
++                }
++                // Produces an object containing all the TaggedTemplateExpression paths detected.
++                // The object contains { scoped, global, resolve }
++                var taggedTemplateExpressions = binding.referencePaths.map(function(ref) {
++                    return ref.parentPath;
++                }).reduce(function(result, path) {
++                    var taggedTemplateExpression;
++                    if (path.isTaggedTemplateExpression()) {
++                        // css`` global`` resolve``
++                        taggedTemplateExpression = path;
++                    } else if (path.parentPath && path.isMemberExpression() && path.parentPath.isTaggedTemplateExpression()) {
++                        // This part is for css.global`` or css.resolve``
++                        // using the default import css
++                        taggedTemplateExpression = path.parentPath;
++                    } else {
++                        return result;
++                    }
++                    var tag = taggedTemplateExpression.get("tag");
++                    var id = tag.isIdentifier() ? tag.node.name : tag.get("property").node.name;
++                    if (result[id]) {
++                        result[id].push(taggedTemplateExpression);
++                    } else {
++                        result.scoped.push(taggedTemplateExpression);
++                    }
++                    return result;
++                }, {
++                    scoped: [],
++                    global: [],
++                    resolve: []
++                });
++                var hasJSXStyle = false;
++                var _opts = state.opts, vendorPrefixes = _opts.vendorPrefixes, sourceMaps = _opts.sourceMaps;
++                Object.keys(taggedTemplateExpressions).forEach(function(type) {
++                    return taggedTemplateExpressions[type].forEach(function(path) {
++                        hasJSXStyle = true;
++                        // Process each css block
++                        processTaggedTemplateExpression({
++                            type: type,
++                            path: path,
++                            file: state.file,
++                            splitRules: typeof state.opts.optimizeForSpeed === "boolean" ? state.opts.optimizeForSpeed : process.env.NODE_ENV === "production",
++                            plugins: state.plugins,
++                            vendorPrefixes: vendorPrefixes,
++                            sourceMaps: sourceMaps,
++                            styleComponentImportName: state.styleComponentImportName,
++                            lintState
++                        });
+                     });
+                 });
++                var hasCssResolve = hasJSXStyle && taggedTemplateExpressions.resolve.length > 0;
++                // When using the `resolve` helper we need to add an import
++                // for the _JSXStyle component `styled-jsx/style`
++                if (hasCssResolve) {
++                    state.file.hasCssResolve = true;
++                }
+             });
+-            var hasCssResolve = hasJSXStyle && taggedTemplateExpressions.resolve.length > 0;
+-            // When using the `resolve` helper we need to add an import
+-            // for the _JSXStyle component `styled-jsx/style`
+-            if (hasCssResolve) {
+-                state.file.hasCssResolve = true;
+-            }
+-        });
+-        // Finally remove the import
+-        path.remove();
+-    }
++            // Finally remove the import
++            path.remove();
++        }
++    };
++    return visitor;
+ };
+ 
++
+ function babelMacro(param) {
+     var createMacro = param.createMacro, MacroError = param.MacroError;
+     var styledJsxMacro = function styledJsxMacro(param) {
+@@ -22196,6 +22240,47 @@ function test() {
+ }
+ function babel(param) {
+     var t = param.types;
++    /**
++     * @typedef {Object} LintError
++     * @property {string} message Human-readable error text
++     * @property {{ start?: { line: number, column: number }, end?: { line: number, column: number } } | null} loc
++     *
++     * @typedef {Object} LintState
++     * @property {LintError[] | null} errors External array provided by ESLint rule when lint mode is enabled
++     */
++    /** @type {LintState} */
++    var lintState = {
++        errors: null
++    };
++    /**
++     * Collects an error into `lintState.errors` when lint mode is on; otherwise returns false.
++     * @param {*} path Babel path
++     * @param {Error & { loc?: unknown }} error Error object or Babel buildCodeFrameError
++     * @returns {boolean} true if captured, false if should throw
++     */
++    var reportLintError = function(path, error) {
++        if (!lintState.errors) {
++            return false;
++        }
++        var loc = error && error.loc ? error.loc : path.node && path.node.loc ? path.node.loc : null;
++        lintState.errors.push({
++            message: error && error.message ? error.message : String(error),
++            loc: loc
++        });
++        return true;
++    };
++    /**
++     * Throw when lint mode is off; otherwise push into lintErrors.
++     * @param {*} path Babel path
++     * @param {Error|(() => Error)} buildError
++     */
++    var throwOrCollect = function(path, buildError) {
++        var error = typeof buildError === "function" ? buildError() : buildError;
++        if (reportLintError(path, error)) {
++            return;
++        }
++        throw error;
++    };
+     var jsxVisitors = {
+         JSXOpeningElement: function JSXOpeningElement(path, state) {
+             var el = path.node;
+@@ -22244,11 +22329,17 @@ function babel(param) {
+                         t.isJSXText(c.node) && c.node.value.trim() !== "";
+                     });
+                     if (children.length !== 1) {
+-                        throw path.buildCodeFrameError("Expected one child under " + ("JSX Style tag, but got " + children.length + " ") + "(eg: <style jsx>{`hi`}</style>)");
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected one child under " + ("JSX Style tag, but got " + children.length + " ") + "(eg: <style jsx>{`hi`}</style>)");
++                        });
++                        continue;
+                     }
+                     var child = children[0];
+                     if (!t.isJSXExpressionContainer(child)) {
+-                        throw path.buildCodeFrameError("Expected a child of " + "type JSXExpressionContainer under JSX Style tag " + ("(eg: <style jsx>{`hi`}</style>), got " + child.type));
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected a child of " + "type JSXExpressionContainer under JSX Style tag " + ("(eg: <style jsx>{`hi`}</style>), got " + child.type));
++                        });
++                        continue;
+                     }
+                     var expression = child.get("expression");
+                     if (t.isIdentifier(expression)) {
+@@ -22263,10 +22354,16 @@ function babel(param) {
+                             ]);
+                             continue;
+                         }
+-                        throw path.buildCodeFrameError("The Identifier " + ("`" + expression.getSource() + "` is either `undefined` or ") + "it is not an external StyleSheet reference i.e. " + "it doesn't come from an `import` or `require` statement");
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("The Identifier " + ("`" + expression.getSource() + "` is either `undefined` or ") + "it is not an external StyleSheet reference i.e. " + "it doesn't come from an `import` or `require` statement");
++                        });
++                        continue;
+                     }
+                     if (!t.isTemplateLiteral(expression) && !t.isStringLiteral(expression)) {
+-                        throw path.buildCodeFrameError("Expected a template " + "literal or String literal as the child of the " + "JSX Style tag (eg: <style jsx>{`some css`}</style>)," + (" but got " + expression.type));
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected a template " + "literal or String literal as the child of the " + "JSX Style tag (eg: <style jsx>{`some css`}</style>)," + (" but got " + expression.type));
++                        });
++                        continue;
+                     }
+                     state.styles.push(getJSXStyleInfo(expression, scope));
+                 }
+@@ -22326,7 +22423,10 @@ function babel(param) {
+                     try {
+                         styleTagSrc = path.getSource();
+                     } catch (error) {}
+-                    throw path.buildCodeFrameError("Detected nested style tag" + (styleTagSrc ? ": \n\n" + styleTagSrc + "\n\n" : " ") + "styled-jsx only allows style tags " + "to be direct descendants (children) of the outermost " + "JSX element i.e. the subtree root.");
++                    throwOrCollect(path, function() {
++                        return path.buildCodeFrameError("Detected nested style tag" + (styleTagSrc ? ": \n\n" + styleTagSrc + "\n\n" : " ") + "styled-jsx only allows style tags " + "to be direct descendants (children) of the outermost " + "JSX element i.e. the subtree root.");
++                    });
++                    return;
+                 }
+                 if (state.externalStyles.length > 0 && path.get("children").filter(function(child) {
+                     if (!t.isJSXExpressionContainer(child)) {
+@@ -22382,6 +22482,8 @@ function babel(param) {
+             Program: {
+                 enter: function enter(path, state) {
+                     setStateOptions(state);
++                    lintState.errors = state.opts.__lint && Array.isArray(state.opts.__lint.errors) ? state.opts.__lint.errors : null;
++                    currentThrowOrCollect = throwOrCollect;
+                     state.hasJSXStyle = null;
+                     state.ignoreClosing = null;
+                     state.file.hasJSXStyle = false;
+@@ -22393,15 +22495,19 @@ function babel(param) {
+                     // dynamic values in classNames could be incorrect
+                     path.traverse(jsxVisitors, state);
+                     // Transpile external styles
+-                    path.traverse(visitor, state);
++                    path.traverse(createExternalVisitor(lintState), state);
+                 },
+                 exit: function exit(path, state) {
+                     if (!state.file.hasJSXStyle && !state.file.hasCssResolve) {
++                        lintState.errors = null;
++                        currentThrowOrCollect = null;
+                         return;
+                     }
+                     state.file.hasJSXStyle = true;
+                     var importDeclaration = createReactComponentImportDeclaration(state);
+                     path.unshiftContainer("body", importDeclaration);
++                    lintState.errors = null;
++                    currentThrowOrCollect = null;
+                 }
+             }
+         }

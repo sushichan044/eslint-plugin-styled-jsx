@@ -72,7 +72,8 @@
   "packageManager": "pnpm@10.23.0",
   "dependencies": {
     "@babel/core": "^7.28.5",
-    "@typescript-eslint/utils": "^8.49.0"
+    "@typescript-eslint/utils": "^8.49.0",
+    "arkregex": "0.0.5"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "catalog:dev",

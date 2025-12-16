@@ -3,6 +3,7 @@ import type { AnyRuleModule } from "@typescript-eslint/utils/ts-eslint";
 import type { Rule } from "eslint";
 
 import { AST_NODE_TYPES, ESLintUtils } from "@typescript-eslint/utils";
+import { regex } from "arkregex";
 
 export const createRule = ESLintUtils.RuleCreator(
   (ruleName) =>
@@ -52,6 +53,8 @@ export function isStyleElement(node: TSESTree.JSXOpeningElement): boolean {
 export function isStyledJSXImport(moduleRequest: unknown): moduleRequest is string {
   return (
     typeof moduleRequest === "string" &&
-    (moduleRequest === "styled-jsx" || moduleRequest.startsWith("styled-jsx/"))
+    (moduleRequest === "styled-jsx" || subpathRegex.test(moduleRequest))
   );
 }
+
+const subpathRegex = regex("^styled-jsx\/css(?:\.m?js)?$");

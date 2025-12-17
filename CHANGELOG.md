@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- **no-styled-jsx**: Support settings `reason` &nbsp;-&nbsp; by **sushichan044** [<samp>(5af4e)</samp>](https://github.com/sushichan044/eslint-plugin-styled-jsx/commit/5af4e69)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/sushichan044/eslint-plugin-styled-jsx/compare/0.1.1...0.1.2)
+
 ## 0.1.1
 
 ### &nbsp;&nbsp;&nbsp;Features

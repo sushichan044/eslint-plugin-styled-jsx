@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.1
+
+### &nbsp;&nbsp;&nbsp;Features
+
+- **no-styled-jsx**: Detect use of tagged template literal &nbsp;-&nbsp; by **sushichan044** [<samp>(96505)</samp>](https://github.com/sushichan044/eslint-plugin-styled-jsx/commit/9650506)
+
+### &nbsp;&nbsp;&nbsp;Bug Fixes
+
+- Match subpath import with regex &nbsp;-&nbsp; by **sushichan044** [<samp>(79189)</samp>](https://github.com/sushichan044/eslint-plugin-styled-jsx/commit/7918977)
+
+##### &nbsp;&nbsp;&nbsp;&nbsp;[View changes on GitHub](https://github.com/sushichan044/eslint-plugin-styled-jsx/compare/0.1.0...0.1.1)
+
 ## 0.1.0
 
 ### &nbsp;&nbsp;&nbsp;Breaking Changes

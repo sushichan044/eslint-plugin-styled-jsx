@@ -1,6 +1,6 @@
 import { transformSync } from "@babel/core";
 
-export interface BabelError extends Error {
+interface BabelError extends Error {
   loc: {
     column: number;
     line: number;
@@ -23,11 +23,20 @@ interface TransformOptions {
   };
 }
 
+type TransformResult =
+  | {
+      error: unknown;
+      isError: true;
+    }
+  | {
+      isError: false;
+    };
+
 export function tryTransformWithBabel(
   code: string,
   filepath: string,
   options?: TransformOptions,
-): BabelError | null {
+): TransformResult {
   try {
     transformSync(code, {
       babelrc: false,
@@ -35,24 +44,26 @@ export function tryTransformWithBabel(
       filename: filepath,
       parserOpts: {
         plugins: ["jsx", "typescript"],
+        ranges: true,
         sourceType: "module",
+        tokens: true,
       },
       plugins: [
-        "styled-jsx/babel",
-        {
-          ...options?.styledJSXOptions,
-        },
+        [
+          "styled-jsx/babel",
+          {
+            ...options?.styledJSXOptions,
+          },
+        ],
       ],
     });
-    return null;
+    return { isError: false };
   } catch (e) {
-    if (!isBabelError(e)) {
-      throw e;
-    }
-    return e;
+    return { error: e, isError: true };
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isBabelError(error: unknown): error is BabelError {
   return (
     typeof error === "object" &&

@@ -21,3 +21,6 @@ catalogs:
     unplugin-unused: ^0.5.6
     vite: ^7.2.7
     vitest: ^4.0.15
+
+patchedDependencies:
+  styled-jsx@5.1.7: patches/styled-jsx@5.1.7.patch

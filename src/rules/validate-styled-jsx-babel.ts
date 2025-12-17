@@ -54,13 +54,8 @@ export default createRule<Options, MessageIds>({
       "Program:exit": (node) => {
         if (styledModule === null || styledTemplates.length === 0) return;
 
-        const result = tryTransformWithBabel(sourceCode.text, context.filename, {
-          styledJSXOptions: {
-            __lint: {
-              errors: [],
-            },
-          },
-        });
+        const result = tryTransformWithBabel(sourceCode.text, context.filename);
+        console.log(result);
 
         for (const error of result.lintErrors) {
           const loc = (error.loc ?? node.loc) as StyledJSXBabelError["loc"] | null;

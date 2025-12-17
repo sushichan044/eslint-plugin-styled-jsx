@@ -54,6 +54,7 @@ await run({
       code: `import css from "styled-jsx";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -63,6 +64,7 @@ await run({
       code: `import css from "styled-jsx/css";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -72,6 +74,7 @@ await run({
       code: `import css from "styled-jsx/css.js";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -81,6 +84,7 @@ await run({
       code: `import css from "styled-jsx/css.mjs";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -90,6 +94,7 @@ await run({
       code: `import { resolve } from "styled-jsx/css";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -99,6 +104,7 @@ await run({
       code: `import * as StyledJSX from "styled-jsx";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -108,6 +114,7 @@ await run({
       code: `import "styled-jsx/style";`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -117,6 +124,7 @@ await run({
       code: `const mod = await import("styled-jsx");`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
       ],
@@ -128,7 +136,7 @@ await run({
       `,
       errors: [
         {
-          data: { attributeName: "jsx" },
+          data: { attributeName: "jsx", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
       ],
@@ -140,7 +148,7 @@ await run({
       `,
       errors: [
         {
-          data: { attributeName: "global" },
+          data: { attributeName: "global", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
       ],
@@ -152,11 +160,11 @@ await run({
       `,
       errors: [
         {
-          data: { attributeName: "jsx" },
+          data: { attributeName: "jsx", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
         {
-          data: { attributeName: "global" },
+          data: { attributeName: "global", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
       ],
@@ -169,9 +177,11 @@ await run({
       `,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXTemplate",
         },
       ],
@@ -183,18 +193,70 @@ await run({
         const Component = () => <style jsx global>{css}</style>;`,
       errors: [
         {
+          data: { reasonSuffix: "" },
           messageId: "noStyledJSXImport",
         },
         {
-          data: { attributeName: "jsx" },
+          data: { attributeName: "jsx", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
         {
-          data: { attributeName: "global" },
+          data: { attributeName: "global", reasonSuffix: "" },
           messageId: "noStyledJSXAttribute",
         },
       ],
       name: "import and attributes combined",
+    },
+    {
+      code: `import css from "styled-jsx/css";`,
+      errors: [
+        {
+          data: { reasonSuffix: " Reason: We use Tailwind CSS instead" },
+          messageId: "noStyledJSXImport",
+        },
+      ],
+      name: "import with custom reason",
+      options: [{ reason: "We use Tailwind CSS instead" }],
+    },
+    {
+      code: `import css from "styled-jsx/css"; const styles = css\`.foo{}\`;`,
+      errors: [
+        {
+          data: { reasonSuffix: " Reason: We use Tailwind CSS instead" },
+          messageId: "noStyledJSXImport",
+        },
+        {
+          data: { reasonSuffix: " Reason: We use Tailwind CSS instead" },
+          messageId: "noStyledJSXTemplate",
+        },
+      ],
+      name: "template with custom reason",
+      options: [{ reason: "We use Tailwind CSS instead" }],
+    },
+    {
+      code: `const Component = () => <style jsx>{css}</style>;`,
+      errors: [
+        {
+          data: {
+            attributeName: "jsx",
+            reasonSuffix: " Reason: We use Tailwind CSS instead",
+          },
+          messageId: "noStyledJSXAttribute",
+        },
+      ],
+      name: "jsx attribute with custom reason",
+      options: [{ reason: "We use Tailwind CSS instead" }],
+    },
+    {
+      code: `import css from "styled-jsx/css";`,
+      errors: [
+        {
+          data: { reasonSuffix: "" },
+          messageId: "noStyledJSXImport",
+        },
+      ],
+      name: "import with empty options object",
+      options: [{}],
     },
   ],
 });

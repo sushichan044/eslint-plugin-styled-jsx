@@ -6,11 +6,19 @@ import { RULE_NO_STYLED_JSX } from "../constants";
 import { prepareStyledJSXModule } from "../styled-jsx";
 import { createRule, isHTMLOpeningElement, isStyledJSXImport } from "../utils";
 
-type Options = [];
+type Options = [
+  {
+    reason?: string;
+  }?,
+];
 type MessageIds = "noStyledJSXAttribute" | "noStyledJSXImport" | "noStyledJSXTemplate";
 
 export default createRule<Options, MessageIds>({
   create: (context) => {
+    const options = context.options[0];
+    const reasonSuffix =
+      options?.reason !== undefined && options.reason !== "" ? ` Reason: ${options.reason}` : "";
+
     let styledJSXModule: StyledJSXModule | null = null;
 
     return {
@@ -22,6 +30,9 @@ export default createRule<Options, MessageIds>({
         const moduleRequest = node.source.value;
         if (isStyledJSXImport(moduleRequest)) {
           context.report({
+            data: {
+              reasonSuffix,
+            },
             messageId: "noStyledJSXImport",
             node,
           });
@@ -34,6 +45,9 @@ export default createRule<Options, MessageIds>({
         if (tag === false) return;
 
         context.report({
+          data: {
+            reasonSuffix,
+          },
           messageId: "noStyledJSXTemplate",
           node,
         });
@@ -47,6 +61,9 @@ export default createRule<Options, MessageIds>({
         const moduleRequest = node.source.value;
         if (isStyledJSXImport(moduleRequest)) {
           context.report({
+            data: {
+              reasonSuffix,
+            },
             messageId: "noStyledJSXImport",
             node,
           });
@@ -67,6 +84,7 @@ export default createRule<Options, MessageIds>({
           context.report({
             data: {
               attributeName: attrName,
+              reasonSuffix,
             },
             messageId: "noStyledJSXAttribute",
             node,
@@ -75,17 +93,30 @@ export default createRule<Options, MessageIds>({
       },
     };
   },
-  defaultOptions: [],
+  defaultOptions: [{}],
   meta: {
+    defaultOptions: [{}],
     docs: {
       description: "Prohibit the use of `styled-jsx`.",
     },
     messages: {
-      noStyledJSXAttribute: "Attribute `{{attributeName}}` on <style> is not allowed.",
-      noStyledJSXImport: "`styled-jsx` imports are not allowed.",
-      noStyledJSXTemplate: "Usage of `styled-jsx` tagged template is not allowed.",
+      noStyledJSXAttribute:
+        "Attribute `{{attributeName}}` on <style> is not allowed.{{reasonSuffix}}",
+      noStyledJSXImport: "`styled-jsx` imports are not allowed.{{reasonSuffix}}",
+      noStyledJSXTemplate: "Usage of `styled-jsx` tagged template is not allowed.{{reasonSuffix}}",
     },
-    schema: [],
+    schema: [
+      {
+        additionalProperties: false,
+        properties: {
+          reason: {
+            description: "Custom reason explaining why styled-jsx is prohibited",
+            type: "string",
+          },
+        },
+        type: "object",
+      },
+    ],
     type: "problem",
   },
   name: RULE_NO_STYLED_JSX,

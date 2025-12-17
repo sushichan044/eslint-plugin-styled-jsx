@@ -35,12 +35,13 @@ interface TransformOptions {
 
 type TransformResult =
   | {
-      error: unknown;
-      isError: true;
+      code: string | null | undefined;
+      isError: false;
       lintErrors: StyledJSXBabelError[];
     }
   | {
-      isError: false;
+      error: unknown;
+      isError: true;
       lintErrors: StyledJSXBabelError[];
     };
 
@@ -57,7 +58,7 @@ export function tryTransformWithBabel(
   };
 
   try {
-    transformSync(code, {
+    const result = transformSync(code, {
       babelrc: false,
       configFile: false,
       filename: filepath,
@@ -77,7 +78,7 @@ export function tryTransformWithBabel(
         ],
       ],
     });
-    return { isError: false, lintErrors };
+    return { code: result?.code, isError: false, lintErrors };
   } catch (e) {
     return { error: e, isError: true, lintErrors };
   }

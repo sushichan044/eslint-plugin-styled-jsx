@@ -18,6 +18,15 @@ import css from "styled-jsx/css";
 ```
 
 ```tsx
+const styles = css`
+  div {
+    color: red;
+  }
+`;
+// ^ Usage of `styled-jsx` tagged template is not allowed.
+```
+
+```tsx
 const Component = () => (
   <>
     <style jsx>{`
@@ -30,3 +39,13 @@ const Component = () => (
   </>
 );
 ```
+
+## Options
+
+<!-- begin auto-generated rule options list -->
+
+| Name     | Description                                           | Type   |
+| :------- | :---------------------------------------------------- | :----- |
+| `reason` | Custom reason explaining why styled-jsx is prohibited | String |
+
+<!-- end auto-generated rule options list -->

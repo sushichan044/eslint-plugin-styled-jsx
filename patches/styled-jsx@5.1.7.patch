@@ -1,0 +1,531 @@
+diff --git a/dist/babel/index.js b/dist/babel/index.js
+index ece0fd62fa168f667d1498c8a54fdfed6d2ac093..f7e4dd9f7d136e2b9fc20d34d9f0c7473d1f5bcc 100644
+--- a/dist/babel/index.js
++++ b/dist/babel/index.js
+@@ -21501,34 +21501,45 @@ var findStyles = function(path) {
+     }
+     return path.get("children").filter(isStyledJsx);
+ };
+-var validateExternalExpressionsVisitor = {
+-    Identifier: function Identifier(path) {
+-        if (lib$1.isMemberExpression(path.parentPath)) {
+-            return;
+-        }
+-        var name = path.node.name;
+-        if (!path.scope.hasBinding(name)) {
+-            throw path.buildCodeFrameError(path.getSource());
+-        }
+-    },
+-    MemberExpression: function MemberExpression(path) {
+-        var node = path.node;
+-        if (!lib$1.isIdentifier(node.object)) {
+-            return;
+-        }
+-        if (!path.scope.hasBinding(node.object.name)) {
+-            throw path.buildCodeFrameError(path.getSource());
++var createValidateExternalExpressionsVisitor = function(throwOrCollect) {
++    return {
++        Identifier: function Identifier(path) {
++            if (lib$1.isMemberExpression(path.parentPath)) {
++                return;
++            }
++            var name = path.node.name;
++            if (!path.scope.hasBinding(name)) {
++                throwOrCollect(path, function() {
++                    return path.buildCodeFrameError(path.getSource());
++                });
++            }
++        },
++        MemberExpression: function MemberExpression(path) {
++            var node = path.node;
++            if (!lib$1.isIdentifier(node.object)) {
++                return;
++            }
++            if (!path.scope.hasBinding(node.object.name)) {
++                throwOrCollect(path, function() {
++                    return path.buildCodeFrameError(path.getSource());
++                });
++            }
++        },
++        ThisExpression: function ThisExpression(path) {
++            throwOrCollect(path, function() {
++                return new Error(path.parentPath.getSource());
++            });
+         }
+-    },
+-    ThisExpression: function ThisExpression(path) {
+-        throw new Error(path.parentPath.getSource());
+-    }
++    };
+ };
+-var validateExternalExpressions = function(path) {
++var validateExternalExpressions = function(path, throwOrCollect) {
++    var visitor = createValidateExternalExpressionsVisitor(throwOrCollect);
+     try {
+-        path.traverse(validateExternalExpressionsVisitor);
++        path.traverse(visitor);
+     } catch (error) {
+-        throw path.buildCodeFrameError("\n      Found an `undefined` or invalid value in your styles: `" + error.message + "`.\n\n      If you are trying to use dynamic styles in external files this is unfortunately not possible yet.\n      Please put the dynamic parts alongside the component. E.g.\n\n      <button>\n        <style jsx>{externalStylesReference}</style>\n        <style jsx>{`\n          button { background-color: ${" + error.message + "} }\n        `}</style>\n      </button>\n    ");
++        throwOrCollect(path, function() {
++            return path.buildCodeFrameError("\n      Found an `undefined` or invalid value in your styles: `" + error.message + "`.\n\n      If you are trying to use dynamic styles in external files this is unfortunately not possible yet.\n      Please put the dynamic parts alongside the component. E.g.\n\n      <button>\n        <style jsx>{externalStylesReference}</style>\n        <style jsx>{`\n          button { background-color: ${" + error.message + "} }\n        `}</style>\n      </button>\n    ");
++        });
+     }
+ };
+ var getJSXStyleInfo = function(expr, scope) {
+@@ -21880,152 +21891,165 @@ function _extends$1() {
+ }
+ var isModuleExports = lib$1.buildMatchMemberExpression("module.exports");
+ function processTaggedTemplateExpression(param) {
+-    var type = param.type, path = param.path, file = param.file, splitRules = param.splitRules, plugins = param.plugins, vendorPrefixes = param.vendorPrefixes, sourceMaps = param.sourceMaps, styleComponentImportName = param.styleComponentImportName;
+-    var templateLiteral = path.get("quasi");
+-    var scope;
+-    // Check whether there are undefined references or
+-    // references to this.something (e.g. props or state).
+-    // We allow dynamic styles only when resolving styles.
+-    if (type !== "resolve") {
+-        validateExternalExpressions(templateLiteral);
+-    } else if (!path.scope.path.isProgram()) {
+-        scope = getScope(path);
+-    }
+-    var stylesInfo = getJSXStyleInfo(templateLiteral, scope);
+-    var ref = computeClassNames([
+-        stylesInfo
+-    ], undefined, styleComponentImportName), staticClassName = ref.staticClassName, className = ref.className;
+-    var styles = processCss(_extends$1({}, stylesInfo, {
+-        staticClassName: staticClassName,
+-        file: file,
+-        isGlobal: type === "global",
+-        plugins: plugins,
+-        vendorPrefixes: vendorPrefixes,
+-        sourceMaps: sourceMaps
+-    }), {
+-        splitRules: splitRules
+-    });
+-    if (type === "resolve") {
+-        var hash = styles.hash, css = styles.css, expressions = styles.expressions;
+-        path.replaceWith(// {
+-        //   styles: <_JSXStyle ... />,
+-        //   className: 'jsx-123'
+-        // }
+-        lib$1.objectExpression([
+-            lib$1.objectProperty(lib$1.identifier("styles"), makeStyledJsxTag(hash, css, expressions, styleComponentImportName)),
+-            lib$1.objectProperty(lib$1.identifier("className"), className)
+-        ]));
+-        return;
+-    }
+-    var id = path.parentPath.node.id;
+-    var baseExportName = id ? id.name : "default";
+-    var parentPath = baseExportName === "default" ? path.parentPath : path.findParent(function(path) {
+-        return path.isVariableDeclaration() || path.isAssignmentExpression() && isModuleExports(path.get("left").node);
+-    });
+-    if (baseExportName !== "default" && !parentPath.parentPath.isProgram()) {
+-        parentPath = parentPath.parentPath;
+-    }
+-    var css1 = cssToBabelType(styles.css);
+-    var newPath = lib$1.isArrayExpression(css1) ? css1 : lib$1.newExpression(lib$1.identifier("String"), [
+-        css1
+-    ]);
+-    // default exports
+-    if (baseExportName === "default") {
+-        var defaultExportIdentifier = path.scope.generateUidIdentifier("defaultExport");
+-        parentPath.insertBefore(lib$1.variableDeclaration("const", [
+-            lib$1.variableDeclarator(defaultExportIdentifier, newPath)
+-        ]));
+-        parentPath.insertBefore(addHash(defaultExportIdentifier, styles.hash));
+-        path.replaceWith(defaultExportIdentifier);
+-        return;
++    var type = param.type, path = param.path, file = param.file, splitRules = param.splitRules, plugins = param.plugins, vendorPrefixes = param.vendorPrefixes, sourceMaps = param.sourceMaps, styleComponentImportName = param.styleComponentImportName, throwOrCollect = param.throwOrCollect;
++    try {
++        var templateLiteral = path.get("quasi");
++        var scope;
++        // Check whether there are undefined references or
++        // references to this.something (e.g. props or state).
++        // We allow dynamic styles only when resolving styles.
++        if (type !== "resolve") {
++            validateExternalExpressions(templateLiteral, throwOrCollect);
++        } else if (!path.scope.path.isProgram()) {
++            scope = getScope(path);
++        }
++        var stylesInfo = getJSXStyleInfo(templateLiteral, scope);
++        var ref = computeClassNames([
++            stylesInfo
++        ], undefined, styleComponentImportName), staticClassName = ref.staticClassName, className = ref.className;
++        var styles = processCss(_extends$1({}, stylesInfo, {
++            staticClassName: staticClassName,
++            file: file,
++            isGlobal: type === "global",
++            plugins: plugins,
++            vendorPrefixes: vendorPrefixes,
++            sourceMaps: sourceMaps
++        }), {
++            splitRules: splitRules
++        });
++        if (type === "resolve") {
++            var hash = styles.hash, css = styles.css, expressions = styles.expressions;
++            path.replaceWith(// {
++            //   styles: <_JSXStyle ... />,
++            //   className: 'jsx-123'
++            // }
++            lib$1.objectExpression([
++                lib$1.objectProperty(lib$1.identifier("styles"), makeStyledJsxTag(hash, css, expressions, styleComponentImportName)),
++                lib$1.objectProperty(lib$1.identifier("className"), className)
++            ]));
++            return;
++        }
++        var id = path.parentPath.node.id;
++        var baseExportName = id ? id.name : "default";
++        var parentPath = baseExportName === "default" ? path.parentPath : path.findParent(function(path) {
++            return path.isVariableDeclaration() || path.isAssignmentExpression() && isModuleExports(path.get("left").node);
++        });
++        if (baseExportName !== "default" && !parentPath.parentPath.isProgram()) {
++            parentPath = parentPath.parentPath;
++        }
++        var css1 = cssToBabelType(styles.css);
++        var newPath = lib$1.isArrayExpression(css1) ? css1 : lib$1.newExpression(lib$1.identifier("String"), [
++            css1
++        ]);
++        // default exports
++        if (baseExportName === "default") {
++            var defaultExportIdentifier = path.scope.generateUidIdentifier("defaultExport");
++            parentPath.insertBefore(lib$1.variableDeclaration("const", [
++                lib$1.variableDeclarator(defaultExportIdentifier, newPath)
++            ]));
++            parentPath.insertBefore(addHash(defaultExportIdentifier, styles.hash));
++            path.replaceWith(defaultExportIdentifier);
++            return;
++        }
++        // local and named exports
++        parentPath.insertAfter(addHash(lib$1.identifier(baseExportName), styles.hash));
++        path.replaceWith(newPath);
++    } catch (error) {
++        if (throwOrCollect) {
++            throwOrCollect(path, function() {
++                return error;
++            });
++            return;
++        }
++        throw error;
+     }
+-    // local and named exports
+-    parentPath.insertAfter(addHash(lib$1.identifier(baseExportName), styles.hash));
+-    path.replaceWith(newPath);
+ }
+ function addHash(exportIdentifier, hash) {
+     var value = typeof hash === "string" ? lib$1.stringLiteral(hash) : hash;
+     return lib$1.expressionStatement(lib$1.assignmentExpression("=", lib$1.memberExpression(exportIdentifier, lib$1.identifier("__hash")), value));
+ }
+-var visitor = {
+-    ImportDeclaration: function ImportDeclaration(path, state) {
+-        // import css from 'styled-jsx/css'
+-        if (path.node.source.value !== "styled-jsx/css") {
+-            return;
+-        }
+-        // Find all the imported specifiers.
+-        // e.g import css, { global, resolve } from 'styled-jsx/css'
+-        // -> ['css', 'global', 'resolve']
+-        var specifiersNames = path.node.specifiers.map(function(specifier) {
+-            return specifier.local.name;
+-        });
+-        specifiersNames.forEach(function(tagName) {
+-            // Get all the reference paths i.e. the places that use the tagName above
+-            // eg.
+-            // css`div { color: red }`
+-            // css.global`div { color: red }`
+-            // global`div { color: red `
+-            var binding = path.scope.getBinding(tagName);
+-            if (!binding || !Array.isArray(binding.referencePaths)) {
++var createExternalVisitor = function(throwOrCollect) {
++    return {
++        ImportDeclaration: function ImportDeclaration(path, state) {
++            // import css from 'styled-jsx/css'
++            if (path.node.source.value !== "styled-jsx/css") {
+                 return;
+             }
+-            // Produces an object containing all the TaggedTemplateExpression paths detected.
+-            // The object contains { scoped, global, resolve }
+-            var taggedTemplateExpressions = binding.referencePaths.map(function(ref) {
+-                return ref.parentPath;
+-            }).reduce(function(result, path) {
+-                var taggedTemplateExpression;
+-                if (path.isTaggedTemplateExpression()) {
+-                    // css`` global`` resolve``
+-                    taggedTemplateExpression = path;
+-                } else if (path.parentPath && path.isMemberExpression() && path.parentPath.isTaggedTemplateExpression()) {
+-                    // This part is for css.global`` or css.resolve``
+-                    // using the default import css
+-                    taggedTemplateExpression = path.parentPath;
+-                } else {
+-                    return result;
+-                }
+-                var tag = taggedTemplateExpression.get("tag");
+-                var id = tag.isIdentifier() ? tag.node.name : tag.get("property").node.name;
+-                if (result[id]) {
+-                    result[id].push(taggedTemplateExpression);
+-                } else {
+-                    result.scoped.push(taggedTemplateExpression);
+-                }
+-                return result;
+-            }, {
+-                scoped: [],
+-                global: [],
+-                resolve: []
++            // Find all the imported specifiers.
++            // e.g import css, { global, resolve } from 'styled-jsx/css'
++            // -> ['css', 'global', 'resolve']
++            var specifiersNames = path.node.specifiers.map(function(specifier) {
++                return specifier.local.name;
+             });
+-            var hasJSXStyle = false;
+-            var _opts = state.opts, vendorPrefixes = _opts.vendorPrefixes, sourceMaps = _opts.sourceMaps;
+-            Object.keys(taggedTemplateExpressions).forEach(function(type) {
+-                return taggedTemplateExpressions[type].forEach(function(path) {
+-                    hasJSXStyle = true;
+-                    // Process each css block
+-                    processTaggedTemplateExpression({
+-                        type: type,
+-                        path: path,
+-                        file: state.file,
+-                        splitRules: typeof state.opts.optimizeForSpeed === "boolean" ? state.opts.optimizeForSpeed : process.env.NODE_ENV === "production",
+-                        plugins: state.plugins,
+-                        vendorPrefixes: vendorPrefixes,
+-                        sourceMaps: sourceMaps,
+-                        styleComponentImportName: state.styleComponentImportName
++            specifiersNames.forEach(function(tagName) {
++                // Get all the reference paths i.e. the places that use the tagName above
++                // eg.
++                // css`div { color: red }`
++                // css.global`div { color: red }`
++                // global`div { color: red `
++                var binding = path.scope.getBinding(tagName);
++                if (!binding || !Array.isArray(binding.referencePaths)) {
++                    return;
++                }
++                // Produces an object containing all the TaggedTemplateExpression paths detected.
++                // The object contains { scoped, global, resolve }
++                var taggedTemplateExpressions = binding.referencePaths.map(function(ref) {
++                    return ref.parentPath;
++                }).reduce(function(result, path) {
++                    var taggedTemplateExpression;
++                    if (path.isTaggedTemplateExpression()) {
++                        // css`` global`` resolve``
++                        taggedTemplateExpression = path;
++                    } else if (path.parentPath && path.isMemberExpression() && path.parentPath.isTaggedTemplateExpression()) {
++                        // This part is for css.global`` or css.resolve``
++                        // using the default import css
++                        taggedTemplateExpression = path.parentPath;
++                    } else {
++                        return result;
++                    }
++                    var tag = taggedTemplateExpression.get("tag");
++                    var id = tag.isIdentifier() ? tag.node.name : tag.get("property").node.name;
++                    if (result[id]) {
++                        result[id].push(taggedTemplateExpression);
++                    } else {
++                        result.scoped.push(taggedTemplateExpression);
++                    }
++                    return result;
++                }, {
++                    scoped: [],
++                    global: [],
++                    resolve: []
++                });
++                var hasJSXStyle = false;
++                var _opts = state.opts, vendorPrefixes = _opts.vendorPrefixes, sourceMaps = _opts.sourceMaps;
++                Object.keys(taggedTemplateExpressions).forEach(function(type) {
++                    return taggedTemplateExpressions[type].forEach(function(path) {
++                        hasJSXStyle = true;
++                        // Process each css block
++                        processTaggedTemplateExpression({
++                            type: type,
++                            path: path,
++                            file: state.file,
++                            splitRules: typeof state.opts.optimizeForSpeed === "boolean" ? state.opts.optimizeForSpeed : process.env.NODE_ENV === "production",
++                            plugins: state.plugins,
++                            vendorPrefixes: vendorPrefixes,
++                            sourceMaps: sourceMaps,
++                            styleComponentImportName: state.styleComponentImportName,
++                            throwOrCollect: throwOrCollect
++                        });
+                     });
+                 });
++                var hasCssResolve = hasJSXStyle && taggedTemplateExpressions.resolve.length > 0;
++                // When using the `resolve` helper we need to add an import
++                // for the _JSXStyle component `styled-jsx/style`
++                if (hasCssResolve) {
++                    state.file.hasCssResolve = true;
++                }
+             });
+-            var hasCssResolve = hasJSXStyle && taggedTemplateExpressions.resolve.length > 0;
+-            // When using the `resolve` helper we need to add an import
+-            // for the _JSXStyle component `styled-jsx/style`
+-            if (hasCssResolve) {
+-                state.file.hasCssResolve = true;
+-            }
+-        });
+-        // Finally remove the import
+-        path.remove();
+-    }
++            // Finally remove the import
++            path.remove();
++        }
++    };
+ };
+ 
+ function babelMacro(param) {
+@@ -22196,7 +22220,27 @@ function test() {
+ }
+ function babel(param) {
+     var t = param.types;
+-    var jsxVisitors = {
++    // Helper to create throwOrCollect function from logger
++    var makeThrowOrCollect = function(logFn) {
++        return function(path, buildError) {
++            var error = typeof buildError === "function" ? buildError() : buildError;
++            if (logFn) {
++                // lint mode: collect error
++                var loc = error && error.loc ? error.loc :
++                          path.node && path.node.loc ? path.node.loc : null;
++                logFn({
++                    message: error && error.message ? error.message : String(error),
++                    loc: loc
++                });
++                return;
++            }
++            // normal mode: throw error
++            throw error;
++        };
++    };
++    // Factory function to create JSX visitors with throwOrCollect support
++    var createJSXVisitors = function(t, throwOrCollect) {
++        var jsxVisitors = {
+         JSXOpeningElement: function JSXOpeningElement(path, state) {
+             var el = path.node;
+             var name = (el.name || {}).name;
+@@ -22244,11 +22288,17 @@ function babel(param) {
+                         t.isJSXText(c.node) && c.node.value.trim() !== "";
+                     });
+                     if (children.length !== 1) {
+-                        throw path.buildCodeFrameError("Expected one child under " + ("JSX Style tag, but got " + children.length + " ") + "(eg: <style jsx>{`hi`}</style>)");
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected one child under " + ("JSX Style tag, but got " + children.length + " ") + "(eg: <style jsx>{`hi`}</style>)");
++                        });
++                        continue;
+                     }
+                     var child = children[0];
+                     if (!t.isJSXExpressionContainer(child)) {
+-                        throw path.buildCodeFrameError("Expected a child of " + "type JSXExpressionContainer under JSX Style tag " + ("(eg: <style jsx>{`hi`}</style>), got " + child.type));
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected a child of " + "type JSXExpressionContainer under JSX Style tag " + ("(eg: <style jsx>{`hi`}</style>), got " + child.type));
++                        });
++                        continue;
+                     }
+                     var expression = child.get("expression");
+                     if (t.isIdentifier(expression)) {
+@@ -22263,10 +22313,16 @@ function babel(param) {
+                             ]);
+                             continue;
+                         }
+-                        throw path.buildCodeFrameError("The Identifier " + ("`" + expression.getSource() + "` is either `undefined` or ") + "it is not an external StyleSheet reference i.e. " + "it doesn't come from an `import` or `require` statement");
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("The Identifier " + ("`" + expression.getSource() + "` is either `undefined` or ") + "it is not an external StyleSheet reference i.e. " + "it doesn't come from an `import` or `require` statement");
++                        });
++                        continue;
+                     }
+                     if (!t.isTemplateLiteral(expression) && !t.isStringLiteral(expression)) {
+-                        throw path.buildCodeFrameError("Expected a template " + "literal or String literal as the child of the " + "JSX Style tag (eg: <style jsx>{`some css`}</style>)," + (" but got " + expression.type));
++                        throwOrCollect(path, function() {
++                            return path.buildCodeFrameError("Expected a template " + "literal or String literal as the child of the " + "JSX Style tag (eg: <style jsx>{`some css`}</style>)," + (" but got " + expression.type));
++                        });
++                        continue;
+                     }
+                     state.styles.push(getJSXStyleInfo(expression, scope));
+                 }
+@@ -22326,7 +22382,10 @@ function babel(param) {
+                     try {
+                         styleTagSrc = path.getSource();
+                     } catch (error) {}
+-                    throw path.buildCodeFrameError("Detected nested style tag" + (styleTagSrc ? ": \n\n" + styleTagSrc + "\n\n" : " ") + "styled-jsx only allows style tags " + "to be direct descendants (children) of the outermost " + "JSX element i.e. the subtree root.");
++                    throwOrCollect(path, function() {
++                        return path.buildCodeFrameError("Detected nested style tag" + (styleTagSrc ? ": \n\n" + styleTagSrc + "\n\n" : " ") + "styled-jsx only allows style tags " + "to be direct descendants (children) of the outermost " + "JSX element i.e. the subtree root.");
++                    });
++                    return;
+                 }
+                 if (state.externalStyles.length > 0 && path.get("children").filter(function(child) {
+                     if (!t.isJSXExpressionContainer(child)) {
+@@ -22355,45 +22414,55 @@ function babel(param) {
+                 path.replaceWith(makeStyledJsxTag(hash, css1, expressions, state.styleComponentImportName));
+             }
+         }
+-    };
+-    // only apply JSXFragment visitor if supported
+-    if (t.isJSXFragment) {
+-        jsxVisitors.JSXFragment = jsxVisitors.JSXElement;
+-        jsxVisitors.JSXOpeningFragment = {
+-            enter: function enter(path, state) {
+-                if (!state.hasJSXStyle) {
+-                    return;
+-                }
+-                if (state.ignoreClosing === null) {
+-                    // We keep a counter of elements inside so that we
+-                    // can keep track of when we exit the parent to reset state
+-                    // note: if we wished to add an option to turn off
+-                    // selectors to reach parent elements, it would suffice to
+-                    // set this to `1` and do an early return instead
+-                    state.ignoreClosing = 0;
+-                }
+-                state.ignoreClosing++;
+-            }
+         };
+-    }
++        // only apply JSXFragment visitor if supported
++        if (t.isJSXFragment) {
++            jsxVisitors.JSXFragment = jsxVisitors.JSXElement;
++            jsxVisitors.JSXOpeningFragment = {
++                enter: function enter(path, state) {
++                    if (!state.hasJSXStyle) {
++                        return;
++                    }
++                    if (state.ignoreClosing === null) {
++                        // We keep a counter of elements inside so that we
++                        // can keep track of when we exit the parent to reset state
++                        // note: if we wished to add an option to turn off
++                        // selectors to reach parent elements, it would suffice to
++                        // set this to `1` and do an early return instead
++                        state.ignoreClosing = 0;
++                    }
++                    state.ignoreClosing++;
++                }
++            };
++        }
++        return jsxVisitors;
++    };
+     var visitors = {
+         inherits: default_1,
+         visitor: {
+             Program: {
+                 enter: function enter(path, state) {
+                     setStateOptions(state);
++                    // Get lint options and create throwOrCollect function
++                    var lintOpts = state.opts.__lint || null;
++                    var throwOrCollect = makeThrowOrCollect(
++                        lintOpts && typeof lintOpts.log === "function" ? lintOpts.log : null
++                    );
+                     state.hasJSXStyle = null;
+                     state.ignoreClosing = null;
+                     state.file.hasJSXStyle = false;
+                     state.file.hasCssResolve = false;
+                     // create unique identifier for _JSXStyle component
+                     state.styleComponentImportName = path.scope.generateUidIdentifier(STYLE_COMPONENT).name;
++                    // Dynamically create visitors with throwOrCollect support
++                    var jsxVisitors = createJSXVisitors(t, throwOrCollect);
++                    var externalVisitor = createExternalVisitor(throwOrCollect);
+                     // we need to beat the arrow function transform and
+                     // possibly others so we traverse from here or else
+                     // dynamic values in classNames could be incorrect
+                     path.traverse(jsxVisitors, state);
+                     // Transpile external styles
+-                    path.traverse(visitor, state);
++                    path.traverse(externalVisitor, state);
+                 },
+                 exit: function exit(path, state) {
+                     if (!state.file.hasJSXStyle && !state.file.hasCssResolve) {

@@ -1,40 +1,63 @@
+/* eslint-disable styled-jsx/require-resolve-for-dynamic-external-css */
 import css from "styled-jsx/css";
 
-const c = (ccc: string) => "#ccc" as const;
-
-const getStyles = (color: string) => css.resolve`
-  .text {
-    color: ${color};
+const getStyles = (color: string) => {
+  if (color === "red") {
+    return css`
+      .text {
+        color: red;
+      }
+    `;
   }
-`;
 
-const style2 = css`
-  .background {
-    background-color: ${c("")};
-  }
-`;
+  return css`
+    .text {
+      color: ${color};
+    }
+  `;
+};
 
-const globalStyles = css.global`
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
+const dyn2 = (isDark: boolean) => css`
+    .dynamic2 {
+      background-color: ${isDark};
+      width: ${isDark ? "100px" : "200px"};
+    }
+  `;
+
+type SS = "a" | "b" | "c";
+
+const ss = (s: SS) => {
+  switch (s) {
+    case "a":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "black" : "white"};
+        }
+      `;
+    case "b":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "red" : "blue"};
+        }
+      `;
+    case "c":
+      return css`
+        .ss {
+          color: ${Math.random() > 0.5 ? "green" : "yellow"};
+        }
+      `;
   }
-`;
+};
 
 export const App = () => {
   const css = getStyles("blue");
 
   return (
     <>
-      {css.styles}
-      <div className={css.className}>
-        <style jsx>{style2}</style>
-        <div className="background">This div has background color.</div>
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <style jsx>{css}</style>
+      <div>
         <p className="text">Hello, styled-jsx!</p>
-        <style global jsx>
-          {globalStyles}
-        </style>
       </div>
     </>
   );

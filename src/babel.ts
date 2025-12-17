@@ -1,17 +1,27 @@
 import { transformSync } from "@babel/core";
 
-export interface BabelError extends Error {
+export interface StyledJSXBabelError {
   loc: {
-    column: number;
-    line: number;
+    end: {
+      column: number;
+      line: number;
+    };
+    start: {
+      column: number;
+      line: number;
+    };
   };
   message: string;
-  reasonCode: string;
+}
+
+interface LintLogger {
+  log(err: StyledJSXBabelError): void;
 }
 
 // https://github.com/vercel/styled-jsx/blob/d7a59379134d73afaeb98177387cd62d54d746be/src/_utils.js#L641-L664
 interface TransformOptions {
-  styledJSXOptions: {
+  styledJSXOptions?: {
+    __lint?: LintLogger;
     plugins?: Array<string | [string, Record<string, unknown>]>;
     sourceMaps?: boolean;
     /**
@@ -23,54 +33,53 @@ interface TransformOptions {
   };
 }
 
+type TransformResult =
+  | {
+      code: string | null | undefined;
+      isError: false;
+      lintErrors: StyledJSXBabelError[];
+    }
+  | {
+      error: unknown;
+      isError: true;
+      lintErrors: StyledJSXBabelError[];
+    };
+
 export function tryTransformWithBabel(
   code: string,
   filepath: string,
   options?: TransformOptions,
-): BabelError | null {
+): TransformResult {
+  const lintErrors: StyledJSXBabelError[] = [];
+  const logger: LintLogger = {
+    log: (err: StyledJSXBabelError) => {
+      lintErrors.push(err);
+    },
+  };
+
   try {
-    transformSync(code, {
+    const result = transformSync(code, {
       babelrc: false,
       configFile: false,
       filename: filepath,
       parserOpts: {
         plugins: ["jsx", "typescript"],
+        ranges: true,
         sourceType: "module",
+        tokens: true,
       },
       plugins: [
-        "styled-jsx/babel",
-        {
-          ...options?.styledJSXOptions,
-        },
+        [
+          "styled-jsx/babel",
+          {
+            ...options?.styledJSXOptions,
+            __lint: logger,
+          },
+        ],
       ],
     });
-    return null;
+    return { code: result?.code, isError: false, lintErrors };
   } catch (e) {
-    if (!isBabelError(e)) {
-      throw e;
-    }
-    return e;
+    return { error: e, isError: true, lintErrors };
   }
-}
-
-function isBabelError(error: unknown): error is BabelError {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "reasonCode" in error &&
-    "message" in error &&
-    "loc" in error &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc === "object" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    (error as any).loc !== null &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    "line" in (error as any).loc &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc.line === "number" &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    "column" in (error as any).loc &&
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    typeof (error as any).loc.column === "number"
-  );
 }

@@ -1,3 +1,6 @@
+packages:
+  - playground
+
 catalogs:
   dev:
     '@arethetypeswrong/core': ^0.18.2
@@ -19,5 +22,5 @@ catalogs:
     vite: ^7.2.7
     vitest: ^4.0.15
 
-packages:
-  - "playground"
+patchedDependencies:
+  styled-jsx@5.1.7: patches/styled-jsx@5.1.7.patch

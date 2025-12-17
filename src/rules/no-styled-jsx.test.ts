@@ -164,6 +164,21 @@ await run({
     },
     {
       code: `
+        import * as styledJsx from "styled-jsx/css";
+        const styles = styledJsx.default\`.foo {color: white;}\`;
+      `,
+      errors: [
+        {
+          messageId: "noStyledJSXImport",
+        },
+        {
+          messageId: "noStyledJSXTemplate",
+        },
+      ],
+      name: "namespace import and usage",
+    },
+    {
+      code: `
         import css from "styled-jsx/css";
         const Component = () => <style jsx global>{css}</style>;`,
       errors: [

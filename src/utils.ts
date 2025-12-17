@@ -43,7 +43,10 @@ export function extractModuleImports(
 /**
  * Check whether the given JSX opening element is a `<elementName>` element.
  */
-export function isHTMLOpeningElement(node: TSESTree.JSXOpeningElement, elementName: string): boolean {
+export function isHTMLOpeningElement(
+  node: TSESTree.JSXOpeningElement,
+  elementName: string,
+): boolean {
   if (node.name.type === AST_NODE_TYPES.JSXIdentifier && node.name.name === elementName) {
     return true;
   }

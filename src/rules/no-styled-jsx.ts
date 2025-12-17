@@ -1,14 +1,23 @@
 import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 
+import type { StyledJSXModule } from "../styled-jsx";
+
 import { RULE_NO_STYLED_JSX } from "../constants";
+import { prepareStyledJSXModule } from "../styled-jsx";
 import { createRule, isHTMLOpeningElement, isStyledJSXImport } from "../utils";
 
 type Options = [];
-type MessageIds = "noStyledJSXAttribute" | "noStyledJSXImport";
+type MessageIds = "noStyledJSXAttribute" | "noStyledJSXImport" | "noStyledJSXTemplate";
 
 export default createRule<Options, MessageIds>({
   create: (context) => {
+    let styledJSXModule: StyledJSXModule | null = null;
+
     return {
+      Program: (node) => {
+        styledJSXModule = prepareStyledJSXModule(node);
+      },
+
       ImportDeclaration: (node) => {
         const moduleRequest = node.source.value;
         if (isStyledJSXImport(moduleRequest)) {
@@ -17,6 +26,17 @@ export default createRule<Options, MessageIds>({
             node,
           });
         }
+      },
+
+      TaggedTemplateExpression: (node) => {
+        if (!styledJSXModule) return;
+        const tag = styledJSXModule.resolveTag(node);
+        if (tag === false) return;
+
+        context.report({
+          messageId: "noStyledJSXTemplate",
+          node,
+        });
       },
 
       ImportExpression: (node) => {
@@ -63,6 +83,7 @@ export default createRule<Options, MessageIds>({
     messages: {
       noStyledJSXAttribute: "Attribute `{{attributeName}}` on <style> is not allowed.",
       noStyledJSXImport: "`styled-jsx` imports are not allowed.",
+      noStyledJSXTemplate: "Usage of `styled-jsx` tagged template is not allowed.",
     },
     schema: [],
     type: "problem",

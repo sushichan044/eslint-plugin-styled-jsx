@@ -7,10 +7,10 @@
     "erasableSyntaxOnly": true,
     "plugins": [
       {
-        "name": "eslint-plugin-import-access",
-      },
-    ],
+        "name": "eslint-plugin-import-access"
+      }
+    ]
   },
   "include": ["src", "*.ts", ".*.ts"],
-  "exclude": ["playground"],
+  "exclude": ["playground"]
 }

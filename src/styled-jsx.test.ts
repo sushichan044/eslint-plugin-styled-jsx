@@ -1,5 +1,7 @@
+import type { TSESTree } from "@typescript-eslint/utils";
+
 import { parse } from "@typescript-eslint/typescript-estree";
-import { AST_NODE_TYPES, type TSESTree } from "@typescript-eslint/utils";
+import { AST_NODE_TYPES } from "@typescript-eslint/utils";
 import { assert, describe, expect, it, test } from "vitest";
 import { walk } from "zimmerframe";
 

@@ -1,11 +1,11 @@
 import type { GenerateOptions } from "eslint-doc-generator";
 
-import { formatFile } from "oxfmt";
+import { format } from "oxfmt";
 
 const config: GenerateOptions = {
   configEmoji: [["prohibit", "💥"]],
   postprocess: async (content, path) => {
-    return await formatFile("markdown", path, content);
+    return (await format(path, content)).code;
   },
 };
 
